@@ -29,8 +29,8 @@ def get_db_connection():
 
 @app.route('/')
 def dashboard():
-    """Página principal del dashboard"""
-    return render_template('dashboard.html')
+    """Página principal del dashboard con datos reales"""
+    return render_template('dashboard_real_data.html')
 
 @app.route('/api/kpis')
 def get_kpis():

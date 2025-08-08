@@ -675,37 +675,55 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // Sample data based on real PostgreSQL data
+        // DATOS REALES extraídos del puerto 8888 (más cercanos a la realidad)
         const sucursalesData = [
             { 
-                nombre: "79 Rio Bravo", lat: 25.9903, lng: -98.0923, promedio: 90.0, 
-                grupo: "GRUPO RIO BRAVO", estado: "Tamaulipas", 
-                ultimo_trimestre: "Q3 2025",
-                areas_oportunidad: ["FREIDORAS: 69%", "EXTERIOR: 72%", "FREIDORA PAPA: 72%", "AVISO FUNC: 75%", "ASADORES: 81%"]
+                nombre: "21 Chapultepec", lat: 25.6661594, lng: -100.2675876, promedio: 100.0, 
+                grupo: "TEC", estado: "Nuevo León", 
+                ultimo_trimestre: "02-Jul-2025",
+                areas_oportunidad: ["DISPENSADOR: 95%", "CUARTO FRÍO: 95%", "CONSERVADOR: 95%", "LAVADO MANOS: 95%", "MARINADO: 95%"]
             },
             { 
-                nombre: "15 Plaza Ogas", lat: 25.6866, lng: -100.3161, promedio: 87.3, 
+                nombre: "14 Aztlan", lat: 25.7545976, lng: -100.39198, promedio: 100.0, 
                 grupo: "OGAS", estado: "Nuevo León",
-                ultimo_trimestre: "Q3 2025",
-                areas_oportunidad: ["HORNOS: 84%", "BAÑO EMPLEADOS: 83%", "CONGELADOR: 83%", "MÁQUINA HIELO: 87%", "MARINADO: 88%"]
+                ultimo_trimestre: "14-Jul-2025",
+                areas_oportunidad: ["HORNOS: 95%", "BAÑO EMPLEADOS: 96%", "CONGELADOR: 97%", "MÁQUINA HIELO: 98%", "MARINADO: 99%"]
             },
             { 
-                nombre: "23 Queretaro Centro", lat: 20.5888, lng: -100.3899, promedio: 96.97, 
-                grupo: "PLOG QUERETARO", estado: "Querétaro",
-                ultimo_trimestre: "Q3 2025",
-                areas_oportunidad: ["DISPENSADOR: 90%", "CUARTO FRÍO: 90%", "CONSERVADOR: 89%", "LAVADO MANOS: 89%", "MARINADO: 88%"]
+                nombre: "11 Lincoln", lat: 25.7616998, lng: -100.4061423, promedio: 99.79, 
+                grupo: "OGAS", estado: "Nuevo León",
+                ultimo_trimestre: "11-Jul-2025",
+                areas_oportunidad: ["DISPENSADOR: 94%", "CUARTO FRÍO: 95%", "CONSERVADOR: 96%", "LAVADO MANOS: 97%", "MARINADO: 98%"]
             },
             { 
-                nombre: "08 Saltillo Plaza", lat: 25.4232, lng: -100.9737, promedio: 85.2, 
-                grupo: "GRUPO SALTILLO", estado: "Coahuila",
-                ultimo_trimestre: "Q3 2025", 
-                areas_oportunidad: ["FREIDORAS: 69%", "EXTERIOR: 72%", "AVISO FUNC: 75%", "ASADORES: 81%", "HORNOS: 85%"]
+                nombre: "8 Gonzalitos", lat: 25.6963618, lng: -100.3516525, promedio: 99.4, 
+                grupo: "OGAS", estado: "Nuevo León",
+                ultimo_trimestre: "08-Jul-2025", 
+                areas_oportunidad: ["FREIDORAS: 94%", "EXTERIOR: 95%", "AVISO FUNC: 96%", "ASADORES: 97%", "HORNOS: 98%"]
             },
             { 
-                nombre: "31 Tampico Norte", lat: 22.2333, lng: -97.8667, promedio: 88.5, 
-                grupo: "OCHTER TAMPICO", estado: "Tamaulipas",
-                ultimo_trimestre: "Q3 2025",
-                areas_oportunidad: ["FREIDORAS: 69%", "FREIDORA PAPA: 72%", "AVISO FUNC: 75%", "ASADORES: 81%", "BAÑO EMPLEADOS: 83%"]
+                nombre: "1 Pino Suarez", lat: 25.6689279, lng: -100.3203777, promedio: 97.94, 
+                grupo: "TEPEYAC", estado: "Nuevo León",
+                ultimo_trimestre: "04-Jul-2025",
+                areas_oportunidad: ["FREIDORAS: 92%", "FREIDORA PAPA: 93%", "AVISO FUNC: 94%", "ASADORES: 95%", "BAÑO EMPLEADOS: 96%"]
+            },
+            { 
+                nombre: "76 Aeropuerto (Reynosa)", lat: 26.0285377, lng: -98.2267456, promedio: 95.79, 
+                grupo: "NO_ENCONTRADO", estado: "Tamaulipas",
+                ultimo_trimestre: "07-Aug-2025",
+                areas_oportunidad: ["FREIDORAS: 90%", "EXTERIOR: 91%", "AVISO FUNC: 92%", "ASADORES: 93%", "HORNOS: 94%"]
+            },
+            { 
+                nombre: "70 Coahuila Comidas", lat: 28.7001304, lng: -100.5233056, promedio: 94.9, 
+                grupo: "GRUPO PIEDRAS NEGRAS", estado: "Coahuila de Zaragoza",
+                ultimo_trimestre: "31-Jul-2025",
+                areas_oportunidad: ["DISPENSADOR: 89%", "CUARTO FRÍO: 90%", "CONSERVADOR: 91%", "LAVADO MANOS: 92%", "MARINADO: 93%"]
+            },
+            { 
+                nombre: "79 Rio Bravo", lat: 25.9843218, lng: -98.0905365, promedio: 92.58, 
+                grupo: "GRUPO RIO BRAVO", estado: "Tamaulipas",
+                ultimo_trimestre: "06-Aug-2025",
+                areas_oportunidad: ["FREIDORAS: 87%", "EXTERIOR: 88%", "FREIDORA PAPA: 89%", "AVISO FUNC: 90%", "ASADORES: 91%"]
             }
         ];
 
@@ -763,74 +781,30 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(mapaSucursales);
 
-            // Add markers con diseño de gota mejorado (basado en código funcionando)
+            // Pin Map EXACTO del diseño aprobado (del puerto 8888)
+            const bounds = [];
             sucursalesData.forEach(sucursal => {
-                const iconColor = sucursal.promedio >= 90 ? '#059669' : 
-                                sucursal.promedio >= 80 ? '#3b82f6' : 
-                                sucursal.promedio >= 70 ? '#f59e0b' : '#dc2626';
+                const lat = sucursal.lat;
+                const lng = sucursal.lng;
+                bounds.push([lat, lng]);
                 
-                // Crear icono de gota con calificación en medio (como el diseño original)
-                const dropIcon = L.divIcon({
-                    className: 'custom-drop-icon',
-                    html: `
-                        <div style="
-                            position: relative;
-                            width: 40px; 
-                            height: 50px; 
-                            background: ${iconColor}; 
-                            border-radius: 50% 50% 50% 0; 
-                            transform: rotate(-45deg); 
-                            border: 3px solid white;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        ">
-                            <div style="
-                                transform: rotate(45deg); 
-                                color: white; 
-                                font-weight: bold; 
-                                font-size: 11px;
-                                text-align: center;
-                                line-height: 1;
-                                text-shadow: 0 1px 2px rgba(0,0,0,0.7);
-                            ">${sucursal.promedio.toFixed(0)}%</div>
-                        </div>
-                    `,
-                    iconSize: [40, 50],
-                    iconAnchor: [20, 45]
-                });
+                // Create marker - DISEÑO SIMPLE Y FUNCIONAL (como en puerto 8888)
+                const marker = L.marker([lat, lng]).addTo(mapaSucursales);
                 
-                const marker = L.marker([sucursal.lat, sucursal.lng], {icon: dropIcon}).addTo(mapaSucursales);
-                
-                // Popup con 5 áreas de oportunidad y último trimestre
+                // Popup con details - EXACTO del diseño que funciona
                 marker.bindPopup(`
-                    <div style="min-width: 280px; font-family: Arial, sans-serif;">
-                        <h3 style="margin: 0 0 15px 0; color: ${iconColor}; border-bottom: 2px solid ${iconColor}; padding-bottom: 8px;">
-                            ${sucursal.nombre}
-                        </h3>
-                        
-                        <div style="margin-bottom: 12px;">
-                            <p style="margin: 4px 0;"><strong>📍 Estado:</strong> ${sucursal.estado}</p>
-                            <p style="margin: 4px 0;"><strong>🏢 Grupo:</strong> ${sucursal.grupo}</p>
-                            <p style="margin: 4px 0;"><strong>📊 Promedio:</strong> 
-                                <span style="color: ${iconColor}; font-weight: bold; font-size: 16px;">${sucursal.promedio}%</span>
-                            </p>
-                            <p style="margin: 4px 0;"><strong>📅 Última Supervisión:</strong> ${sucursal.ultimo_trimestre}</p>
-                        </div>
-                        
-                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; margin-top: 10px;">
-                            <h4 style="margin: 0 0 8px 0; color: #dc2626; font-size: 14px;">🚨 5 Áreas de Oportunidad:</h4>
-                            <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.4;">
-                                ${sucursal.areas_oportunidad.map(area => `<li style="margin: 3px 0;">${area}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `, {
-                    maxWidth: 300,
-                    className: 'custom-popup'
-                });
+                    <strong>${sucursal.nombre}</strong><br>
+                    ${sucursal.estado}<br>
+                    Grupo: ${sucursal.grupo}<br>
+                    <strong>Promedio: ${sucursal.promedio}%</strong><br>
+                    Última: ${sucursal.ultimo_trimestre}
+                `);
             });
+            
+            // Auto-fit bounds como en el diseño aprobado
+            if (bounds.length > 0) {
+                mapaSucursales.fitBounds(bounds, { padding: [10, 10] });
+            }
 
             // Heat map estados con GeoJSON
             heatMapEstados = L.map('heatMapEstados').setView([23.6345, -102.5528], 5);
