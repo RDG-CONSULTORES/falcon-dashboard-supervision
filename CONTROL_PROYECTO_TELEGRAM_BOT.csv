@@ -1,0 +1,84 @@
+HOJA,COMPONENTE,TIPO,RUTA/FUNCIÓN,ESTADO,PRIORIDAD,DESCRIPCIÓN,PROBLEMAS_IDENTIFICADOS,TIEMPO_ESTIMADO,ASIGNADO_A,FECHA_INICIO,FECHA_LIMITE,NOTAS
+
+BOT_COMANDOS,/start,Comando,start(),✅ Funcional,Alta,Mensaje de bienvenida + teclado personalizado,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+BOT_COMANDOS,/help,Comando,help_command(),✅ Funcional,Media,Lista de comandos y ayuda,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+BOT_COMANDOS,/status,Comando,status(),⚠️ Error menor,Alta,Verificar estado del sistema,Error módulo database,1h,Dev,23/07/2025,23/07/2025,PENDIENTE - necesita fix de import
+BOT_COMANDOS,/sucursales,Comando,sucursales(),⚠️ Error menor,Media,Lista todas las sucursales,Error módulo database,1h,Dev,23/07/2025,23/07/2025,PENDIENTE - necesita fix de import
+BOT_COMANDOS,/resumen,Comando,resumen(),⚠️ Error menor,Media,Resumen estadístico + botón dashboard,Error módulo database,1h,Dev,23/07/2025,23/07/2025,PENDIENTE - necesita fix de import
+
+BOT_BOTONES,📈 Indicadores por Áreas,Botón Teclado,indicadores_areas(),✅ Funcional,Alta,Muestra áreas operativas + mini web app,,1h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+BOT_BOTONES,📋 Ayuda,Botón Teclado,help_command(),✅ Funcional,Baja,Mismo que /help,,0.2h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+BOT_BOTONES,📊 Estado,Botón Teclado,status(),⚠️ Error menor,Media,Mismo que /status,Error módulo database,1h,Dev,23/07/2025,23/07/2025,PENDIENTE - necesita fix de import
+
+BOT_INLINE,🏪 Ventas,Botón Inline,area_ventas,🔄 Datos simulados,Media,Métricas simuladas de ventas,Mostrar datos reales de DB,2h,Dev,24/07/2025,24/07/2025,PENDIENTE - integrar datos reales
+BOT_INLINE,⚙️ Operaciones,Botón Inline,area_operaciones,🔄 Datos simulados,Media,Métricas simuladas de operaciones,Mostrar datos reales de DB,2h,Dev,24/07/2025,24/07/2025,PENDIENTE - integrar datos reales
+BOT_INLINE,👥 Servicio al Cliente,Botón Inline,area_servicio,🔄 Datos simulados,Media,Métricas simuladas de servicio,Mostrar datos reales de DB,2h,Dev,24/07/2025,24/07/2025,PENDIENTE - integrar datos reales
+BOT_INLINE,📦 Inventarios,Botón Inline,area_inventarios,🔄 Datos simulados,Media,Métricas simuladas de inventarios,Mostrar datos reales de DB,2h,Dev,24/07/2025,24/07/2025,PENDIENTE - integrar datos reales
+BOT_INLINE,👔 Recursos Humanos,Botón Inline,area_rrhh,🔄 Datos simulados,Media,Métricas simuladas de RRHH,Mostrar datos reales de DB,2h,Dev,24/07/2025,24/07/2025,PENDIENTE - integrar datos reales
+BOT_INLINE,📊 Dashboard Detallado,WebApp Button,/indicadores-areas,✅ Funcional,Alta,Abre dashboard de áreas,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+BOT_INLINE,🏠 Dashboard Principal,WebApp Button,/,✅ Funcional,Alta,Abre dashboard principal,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+
+BOT_MENU,📊 Abrir Dashboard Analytics,Menu Button,WEBAPP_URL,✅ Funcional,Alta,Botón persistente en chat,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+
+FLASK_RUTAS,/,GET Route,metabase_dashboard.html,✅ Funcional,Alta,Dashboard principal,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+FLASK_RUTAS,/indicadores-areas,GET Route,indicadores_areas.html,✅ Funcional,Alta,Dashboard por áreas,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+
+API_CORE,/api/health,GET,health_check(),✅ Funcional,Alta,Health check + DB status,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+API_CORE,/api/summary,GET,get_summary_stats(),✅ Funcional,Alta,Estadísticas generales,,1h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+API_CORE,/api/sucursales,GET,get_sucursales_list(),✅ Funcional,Media,Lista de sucursales,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+API_CORE,/api/grupos,GET,get_grupos_operativos(),✅ Funcional,Media,Lista de grupos operativos,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+API_CORE,/api/areas,GET,get_areas_evaluacion(),✅ Funcional,Media,Lista de áreas de evaluación,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+
+API_PERFORMANCE,/api/performance/sucursal,GET,get_performance_by_sucursal_filtered(),✅ Funcional,Alta,Performance por sucursal con filtros,,2h,Dev,22/07/2025,22/07/2025,Completado - filtros funcionando
+API_PERFORMANCE,/api/performance/grupo,GET,get_performance_by_grupo_filtered(),✅ Funcional,Alta,Performance por grupo con filtros,,2h,Dev,22/07/2025,22/07/2025,Completado - filtros funcionando
+API_PERFORMANCE,/api/performance/area,GET,get_performance_by_area(),✅ Funcional,Media,Performance por área,,1h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+
+API_AREAS,/api/areas/supervision,GET,get_areas_supervision(),✅ Funcional,Alta,Datos de supervisión por área,,1h,Dev,21/07/2025,21/07/2025,Completado - funciona correctamente
+API_AREAS,/api/areas/details/<area>,GET,get_area_details(),✅ Funcional,Media,Detalles de área específica,,1h,Dev,21/07/2025,21/07/2025,Completado - funciona correctamente
+API_AREAS,/api/areas/trends,GET,get_areas_trends(),✅ Funcional,Baja,Tendencias por áreas,,1h,Dev,21/07/2025,21/07/2025,Completado - funciona correctamente
+API_AREAS,/api/areas/critical,GET,get_critical_areas(),✅ Funcional,Baja,Áreas críticas,,1h,Dev,21/07/2025,21/07/2025,Completado - funciona correctamente
+API_AREAS,/api/areas/success,GET,get_success_areas(),✅ Funcional,Baja,Áreas exitosas,,1h,Dev,21/07/2025,21/07/2025,Completado - funciona correctamente
+
+API_METADATA,/api/metadata/grupos,GET,get_grupos_operativos(),✅ Funcional,Media,Lista grupos para filtros,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+API_METADATA,/api/metadata/estados,GET,execute_query(),✅ Funcional,Media,Lista estados para filtros,,0.5h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+
+API_EXTRAS,/api/trends,GET,get_trends_by_date(),✅ Funcional,Baja,Tendencias temporales,,1h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+API_EXTRAS,/api/metrics,GET,get_detailed_performance(),✅ Funcional,Baja,Métricas detalladas con filtros,,1h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+API_EXTRAS,/api/export,GET,export_data(),✅ Funcional,Baja,Exportación CSV/JSON,,1h,Dev,22/07/2025,22/07/2025,Completado - funciona correctamente
+
+FRONTEND_MAIN,metabase_dashboard.html,Template,Dashboard Principal,✅ Funcional,Alta,Dashboard principal con mapas y gráficos,Mejorar responsive design,4h,Dev,25/07/2025,26/07/2025,PENDIENTE - necesita optimización móvil
+FRONTEND_MAIN,dashboard_optimizado.js,JavaScript,Dashboard Principal,✅ Funcional,Alta,JavaScript principal del dashboard,Mejorar error handling,3h,Dev,25/07/2025,26/07/2025,PENDIENTE - necesita mejores validaciones
+
+FRONTEND_AREAS,indicadores_areas.html,Template,Dashboard Áreas,✅ Funcional,Alta,Dashboard de áreas de supervisión,Mejorar responsive design,4h,Dev,25/07/2025,26/07/2025,PENDIENTE - necesita optimización móvil
+FRONTEND_AREAS,indicadores_areas.js,JavaScript,Dashboard Áreas,✅ Funcional,Alta,JavaScript para indicadores por áreas,Mejorar error handling,3h,Dev,25/07/2025,26/07/2025,PENDIENTE - necesitas mejores validaciones
+
+FRONTEND_ASSETS,mexico-*.js,GeoJSON,Mapas,✅ Funcional,Media,GeoJSON para mapas de México,Optimizar para móvil,2h,Dev,26/07/2025,27/07/2025,PENDIENTE - optimización pendiente
+FRONTEND_ASSETS,metabase_dashboard.css,CSS,Estilos,✅ Funcional,Media,Estilos principales,Mejorar responsive,3h,Dev,26/07/2025,27/07/2025,PENDIENTE - responsive improvements
+
+DATABASE,connection.py,Módulo,Database,✅ Funcional,Alta,Pool de conexiones PostgreSQL,,1h,Dev,20/07/2025,20/07/2025,Completado - funciona correctamente
+DATABASE,queries.py,Módulo,Database,✅ Funcional,Alta,Consultas principales,,2h,Dev,21/07/2025,21/07/2025,Completado - funciona correctamente
+DATABASE,queries_areas.py,Módulo,Database,✅ Funcional,Alta,Consultas específicas de áreas,,2h,Dev,21/07/2025,21/07/2025,Completado - funciona correctamente
+
+CONFIG,.env,Config,Configuración,✅ Funcional,Media,Variables de entorno,,0.2h,Dev,20/07/2025,20/07/2025,Completado - configurado correctamente
+CONFIG,requirements.txt,Config,Dependencias,✅ Funcional,Media,Dependencias Python,,0.2h,Dev,20/07/2025,20/07/2025,Completado - funciona correctamente
+
+TESTING,Testing Bot Comandos,Testing,Manual/Automated,❌ Pendiente,Alta,Probar todos los comandos del bot,Crear suite de tests,4h,QA,27/07/2025,28/07/2025,PENDIENTE - necesita testing completo
+TESTING,Testing Mini Web App,Testing,Manual/Automated,❌ Pendiente,Alta,Probar dashboard en diferentes dispositivos,Testing responsive,6h,QA,27/07/2025,29/07/2025,PENDIENTE - testing cross-browser
+TESTING,Testing APIs,Testing,Automated,❌ Pendiente,Alta,Probar todos los endpoints,Suite de tests API,4h,QA,27/07/2025,28/07/2025,PENDIENTE - testing de carga
+TESTING,Testing Filtros,Testing,Manual,❌ Pendiente,Alta,Verificar funcionamiento de filtros,Testing de edge cases,3h,QA,28/07/2025,28/07/2025,PENDIENTE - casos límite
+
+PRODUCCION,Servidor Producción,Deploy,Infrastructure,❌ Pendiente,Alta,Configurar servidor de producción,Definir infraestructura,8h,DevOps,29/07/2025,31/07/2025,PENDIENTE - necesita planificación
+PRODUCCION,Base de Datos Prod,Deploy,Database,❌ Pendiente,Alta,Configurar BD de producción,Migración y backup,4h,DevOps,29/07/2025,30/07/2025,PENDIENTE - configuración pendiente
+PRODUCCION,HTTPS/SSL,Deploy,Security,❌ Pendiente,Alta,Configurar certificados SSL,Seguridad HTTPS,2h,DevOps,30/07/2025,30/07/2025,PENDIENTE - certificados SSL
+PRODUCCION,Domain/DNS,Deploy,Infrastructure,❌ Pendiente,Media,Configurar dominio personalizado,Reemplazar ngrok,3h,DevOps,30/07/2025,31/07/2025,PENDIENTE - dominio personalizado
+PRODUCCION,Monitoring,Deploy,Operations,❌ Pendiente,Media,Sistema de monitoreo,Logs y alertas,4h,DevOps,31/07/2025,01/08/2025,PENDIENTE - configurar monitoring
+
+MEJORAS,Error Handling Frontend,Enhancement,Frontend,❌ Pendiente,Media,Mejorar manejo de errores,Loading states y fallbacks,4h,Dev,26/07/2025,27/07/2025,PENDIENTE - UX improvements
+MEJORAS,Responsive Design,Enhancement,Frontend,❌ Pendiente,Alta,Optimizar para móviles,Testing en dispositivos,6h,Dev,26/07/2025,28/07/2025,PENDIENTE - mobile optimization
+MEJORAS,Offline Support,Enhancement,Frontend,❌ Pendiente,Baja,Soporte para datos offline,Cache y fallbacks,8h,Dev,01/08/2025,03/08/2025,FUTURO - nice to have
+MEJORAS,Performance Optimization,Enhancement,Backend,❌ Pendiente,Media,Optimizar consultas BD,Índices y cache,4h,Dev,28/07/2025,29/07/2025,PENDIENTE - optimization
+MEJORAS,Real-time Updates,Enhancement,Full Stack,❌ Pendiente,Baja,Actualizaciones en tiempo real,WebSockets,12h,Dev,03/08/2025,05/08/2025,FUTURO - advanced feature
+
+DOCUMENTACION,README Actualizado,Docs,Documentation,❌ Pendiente,Media,Actualizar documentación,Instrucciones completas,2h,Dev,31/07/2025,31/07/2025,PENDIENTE - docs update
+DOCUMENTACION,API Documentation,Docs,Documentation,❌ Pendiente,Media,Documentar todos los endpoints,Swagger/OpenAPI,4h,Dev,01/08/2025,02/08/2025,PENDIENTE - API docs
+DOCUMENTACION,User Manual,Docs,Documentation,❌ Pendiente,Baja,Manual de usuario,Guía de uso,3h,Dev,02/08/2025,03/08/2025,FUTURO - user guide

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Dashboard Estilo Metabase - EPL CAS</title>
+    
+    <!-- Leaflet para mapas profesionales -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- ApexCharts para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    
+    <style>
+        :root {
+            --metabase-blue: #509EE3;
+            --metabase-dark-blue: #2E5266;
+            --metabase-purple-light: #CDB4DB;
+            --metabase-purple: #A663CC;
+            --metabase-purple-dark: #7B2CBF;
+            --metabase-purple-darker: #5A189A;
+            --metabase-red: #E74C3C;
+            --metabase-bg: #F9FBFC;
+            --metabase-card: #FFFFFF;
+            --metabase-border: #E4E8EC;
+            --metabase-text: #2E3138;
+            --metabase-secondary: #7C8B8F;
+            --metabase-gray: #E0E0E0;
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--metabase-bg);
+            color: var(--metabase-text);
+            line-height: 1.5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--metabase-blue), var(--metabase-dark-blue));
+            color: white;
+            padding: 25px 35px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 8px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: var(--metabase-card);
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            background: var(--metabase-card);
+            padding: 20px 25px 15px 25px;
+            border-bottom: 1px solid var(--metabase-border);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: var(--metabase-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            margin: 0;
+        }
+        
+        .card-content {
+            padding: 20px 25px;
+        }
+        
+        .chart-container, .map-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 4px;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--metabase-card);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .filter-controls {
+            background: var(--metabase-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--metabase-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--metabase-border);
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            color: var(--metabase-text);
+            min-width: 120px;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--metabase-blue);
+            box-shadow: 0 0 0 2px rgba(80, 158, 227, 0.2);
+        }
+        
+        /* Estilos para mapas Leaflet */
+        .leaflet-popup-content-wrapper {
+            background-color: var(--metabase-card);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .leaflet-popup-content {
+            font-family: 'Lato', sans-serif;
+            line-height: 1.4;
+            margin: 15px;
+        }
+        
+        .popup-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--metabase-text);
+            margin-bottom: 8px;
+        }
+        
+        .popup-info {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .popup-score {
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 8px;
+        }
+        
+        .score-excellent { color: var(--metabase-green); }
+        .score-good { color: var(--metabase-orange); }
+        .score-poor { color: var(--metabase-red); }
+        
+        /* Loading animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--metabase-secondary);
+        }
+        
+        .spinner {
+            border: 3px solid var(--metabase-border);
+            border-top: 3px solid var(--metabase-blue);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Dashboard Ejecutivo - EPL CAS</h1>
+        <p>Supervisión Operativa y Control de Seguridad - Estilo Metabase Profesional</p>
+    </div>
+    
+    <div class="status-indicator" id="statusIndicator">
+        <div class="spinner"></div>
+        Cargando datos...
+    </div>
+    
+    <div class="filter-controls">
+        <div class="filter-group">
+            <label class="filter-label">Trimestre</label>
+            <select class="filter-select" id="quarterFilter">
+                <option value="ALL">Todos los trimestres</option>
+                <option value="Q1">Q1 2025</option>
+                <option value="Q2">Q2 2025</option>
+                <option value="Q3" selected>Q3 2025</option>
+                <option value="Q4">Q4 2025</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">Estado</label>
+            <select class="filter-select" id="estadoFilter">
+                <option value="">Todos los estados</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">Grupo Operativo</label>
+            <select class="filter-select" id="grupoFilter">
+                <option value="">Todos los grupos</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="dashboard-grid">
+        <!-- Mapa de Estados con GeoJSON -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    🗺️ Performance por Estado
+                </h3>
+                <p class="card-subtitle">Vista geográfica del rendimiento promedio por estado</p>
+            </div>
+            <div class="card-content">
+                <div id="stateMap" class="map-container"></div>
+            </div>
+        </div>
+        
+        <!-- Mapa de Sucursales con Pins -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    📍 Sucursales - Pin Map
+                </h3>
+                <p class="card-subtitle">Ubicación y performance de sucursales individuales</p>
+            </div>
+            <div class="card-content">
+                <div id="pinMap" class="map-container"></div>
+            </div>
+        </div>
+        
+        <!-- Gráfico de Barras por Grupo -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    📊 Performance por Grupo Operativo
+                </h3>
+                <p class="card-subtitle">Comparativo de rendimiento entre grupos</p>
+            </div>
+            <div class="card-content">
+                <div id="grupoChart" class="chart-container"></div>
+            </div>
+        </div>
+        
+        <!-- Gráfico de Tendencias -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    📈 Tendencia Temporal
+                </h3>
+                <p class="card-subtitle">Evolución del performance a lo largo del tiempo</p>
+            </div>
+            <div class="card-content">
+                <div id="trendChart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración global
+        const API_BASE = 'https://b28030f54f88.ngrok-free.app';
+        const HEADERS = { 'ngrok-skip-browser-warning': 'true' };
+        
+        // Variables globales para mapas
+        let stateMap, pinMap;
+        let stateLayer, pinLayer;
+        
+        // Datos globales
+        let currentFilters = {
+            quarter: 'Q3',
+            estado: '',
+            grupo: ''
+        };
+        
+        // Colores estilo Metabase
+        const COLORS = {
+            purple_light: '#CDB4DB',
+            purple: '#A663CC',
+            purple_dark: '#7B2CBF',
+            purple_darker: '#5A189A',
+            primary: '#509EE3',    // Azul Metabase
+            red: '#E74C3C',        // Rojo Metabase
+            gray: '#E0E0E0',       // Gris para sin datos
+            secondary: '#7C8B8F'   // Gris
+        };
+        
+        // Función para obtener color basado en performance (estilo Metabase)
+        function getPerformanceColor(score) {
+            if (score >= 95) return '#5A189A';  // Púrpura muy oscuro
+            if (score >= 90) return '#7B2CBF';  // Púrpura oscuro
+            if (score >= 85) return '#A663CC';  // Púrpura medio
+            if (score >= 80) return '#CDB4DB';  // Púrpura claro
+            return '#E0E0E0';  // Gris para estados sin datos
+        }
+        
+        // Función para obtener color de pin (azul Metabase)
+        function getPinColor(score) {
+            return '#509EE3';  // Azul Metabase para todos los pins
+        }
+        
+        // Función para obtener clase CSS basada en performance
+        function getPerformanceClass(score) {
+            if (score >= 85) return 'score-excellent';
+            if (score >= 70) return 'score-good';
+            return 'score-poor';
+        }
+        
+        // Función para crear marker personalizado tipo gota AL REVÉS (punta hacia arriba)
+        function createDropletIcon(color, score) {
+            const svgIcon = `
+                <svg width="25" height="35" viewBox="0 0 25 35" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+                        </filter>
+                    </defs>
+                    <!-- Gota invertida: punta hacia arriba -->
+                    <path d="M12.5 35C12.5 35 25 22.5 25 15C25 7.5 19.4 0 12.5 0C5.6 0 0 7.5 0 15C0 22.5 12.5 35 12.5 35Z" 
+                          fill="${color}" 
+                          stroke="#FFFFFF" 
+                          stroke-width="2" 
+                          filter="url(#shadow)"/>
+                    <circle cx="12.5" cy="17" r="8" fill="rgba(255,255,255,0.9)" stroke="${color}" stroke-width="1"/>
+                    <text x="12.5" y="21" text-anchor="middle" fill="${color}" font-family="Lato" font-size="8" font-weight="600">
+                        ${Math.round(score)}
+                    </text>
+                </svg>
+            `;
+            
+            return L.divIcon({
+                html: svgIcon,
+                className: 'custom-droplet-marker',
+                iconSize: [25, 35],
+                iconAnchor: [12, 0],  // Anchor en la punta (arriba)
+                popupAnchor: [0, 5]   // Popup un poco abajo
+            });
+        }
+        
+        // Inicializar mapas
+        function initializeMaps() {
+            // Mapa de Estados
+            stateMap = L.map('stateMap', {
+                center: [23.6345, -102.5528],
+                zoom: 5,
+                zoomControl: true,
+                scrollWheelZoom: true
+            });
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(stateMap);
+            
+            // Mapa de Pins
+            pinMap = L.map('pinMap', {
+                center: [23.6345, -102.5528],
+                zoom: 6,
+                zoomControl: true,
+                scrollWheelZoom: true
+            });
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(pinMap);
+        }
+        
+        // Cargar datos de estados
+        async function loadStatesData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/estados/performance`, { headers: HEADERS });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    return data.data;
+                }
+                return [];
+            } catch (error) {
+                console.error('Error loading states data:', error);
+                return [];
+            }
+        }
+        
+        // Cargar datos de sucursales
+        async function loadSucursalesData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/sucursales/coordinates`, { headers: HEADERS });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    return data.data;
+                }
+                return [];
+            } catch (error) {
+                console.error('Error loading sucursales data:', error);
+                return [];
+            }
+        }
+        
+        // Crear mapa de estados con GeoJSON
+        async function createStatesMap() {
+            try {
+                const statesData = await loadStatesData();
+                
+                // Cargar GeoJSON de Angel Inmara
+                const response = await fetch('/static/js/mexico-angel-geojson-new.js');
+                const geoJsonData = await response.json();
+                
+                // Crear mapeo de datos por estado
+                const stateDataMap = {};
+                statesData.forEach(state => {
+                    stateDataMap[state.estado] = state;
+                });
+                
+                // Crear capa GeoJSON
+                if (stateLayer) {
+                    stateMap.removeLayer(stateLayer);
+                }
+                
+                stateLayer = L.geoJSON(geoJsonData, {
+                    style: function(feature) {
+                        const stateName = feature.properties.name;
+                        const stateData = stateDataMap[stateName];
+                        
+                        // Si no hay datos, mostrar en gris claro (como Metabase)
+                        if (!stateData) {
+                            return {
+                                fillColor: '#E0E0E0',  // Gris claro
+                                weight: 1,
+                                opacity: 0.5,
+                                color: '#FFFFFF',
+                                dashArray: '',
+                                fillOpacity: 0.3
+                            };
+                        }
+                        
+                        const promedio = stateData.promedio;
+                        
+                        return {
+                            fillColor: getPerformanceColor(promedio),
+                            weight: 2,
+                            opacity: 1,
+                            color: '#FFFFFF',
+                            dashArray: '',
+                            fillOpacity: 0.8
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const stateName = feature.properties.name;
+                        const stateData = stateDataMap[stateName];
+                        
+                        if (stateData) {
+                            const popupContent = `
+                                <div class="popup-title">${stateName}</div>
+                                <div class="popup-info">Sucursales: ${stateData.sucursales}</div>
+                                <div class="popup-info">Supervisiones: ${stateData.supervisiones}</div>
+                                <div class="popup-info">Período: ${stateData.fecha_inicio} - ${stateData.fecha_fin}</div>
+                                <div class="popup-score ${getPerformanceClass(stateData.promedio)}">
+                                    Performance: ${stateData.promedio}%
+                                </div>
+                            `;
+                            layer.bindPopup(popupContent);
+                        }
+                        
+                        layer.on({
+                            mouseover: function(e) {
+                                const layer = e.target;
+                                layer.setStyle({
+                                    weight: 3,
+                                    color: '#666',
+                                    fillOpacity: 0.9
+                                });
+                            },
+                            mouseout: function(e) {
+                                stateLayer.resetStyle(e.target);
+                            }
+                        });
+                    }
+                }).addTo(stateMap);
+                
+            } catch (error) {
+                console.error('Error creating states map:', error);
+            }
+        }
+        
+        // Crear mapa de pins
+        async function createPinMap() {
+            try {
+                const sucursalesData = await loadSucursalesData();
+                
+                // Limpiar capa anterior
+                if (pinLayer) {
+                    pinMap.removeLayer(pinLayer);
+                }
+                
+                pinLayer = L.layerGroup().addTo(pinMap);
+                
+                sucursalesData.forEach(sucursal => {
+                    if (sucursal.lat && sucursal.lng) {
+                        const color = getPinColor(sucursal.score);  // Azul Metabase para todos
+                        const icon = createDropletIcon(color, sucursal.score);
+                        
+                        const popupContent = `
+                            <div class="popup-title">${sucursal.sucursal}</div>
+                            <div class="popup-info">📍 ${sucursal.municipio}, ${sucursal.estado}</div>
+                            <div class="popup-info">📅 ${sucursal.quarter} ${sucursal.year}</div>
+                            <div class="popup-info">📊 Última supervisión: ${sucursal.fecha_supervision}</div>
+                            <div class="popup-info">👨‍💼 Director: ${sucursal.director_operativo}</div>
+                            <div class="popup-info">👷 Supervisor: ${sucursal.supervisor_campo}</div>
+                            <div class="popup-score ${getPerformanceClass(sucursal.score)}">
+                                Performance: ${sucursal.score}%
+                            </div>
+                        `;
+                        
+                        const marker = L.marker([sucursal.lat, sucursal.lng], { icon })
+                            .bindPopup(popupContent)
+                            .addTo(pinLayer);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error creating pin map:', error);
+            }
+        }
+        
+        // Crear gráfico de grupos
+        async function createGrupoChart() {
+            try {
+                const response = await fetch(`${API_BASE}/api/performance/grupo`, { headers: HEADERS });
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.length > 0) {
+                    const chartData = data.data.map(item => ({
+                        x: item.grupo_operativo,
+                        y: parseFloat(item.promedio)
+                    }));
+                    
+                    const options = {
+                        series: [{
+                            name: 'Performance',
+                            data: chartData
+                        }],
+                        chart: {
+                            type: 'bar',
+                            height: 350,
+                            toolbar: { show: false },
+                            fontFamily: 'Lato, sans-serif'
+                        },
+                        colors: [COLORS.primary],
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 4,
+                                horizontal: false,
+                                columnWidth: '60%'
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function(val) {
+                                return val.toFixed(1) + '%';
+                            },
+                            style: {
+                                fontSize: '12px',
+                                fontWeight: 600
+                            }
+                        },
+                        xaxis: {
+                            categories: data.data.map(item => item.grupo_operativo),
+                            labels: {
+                                style: {
+                                    fontSize: '12px'
+                                }
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Performance (%)',
+                                style: {
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }
+                            },
+                            labels: {
+                                formatter: function(val) {
+                                    return val.toFixed(0) + '%';
+                                }
+                            }
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            y: {
+                                formatter: function(val) {
+                                    return val.toFixed(1) + '%';
+                                }
+                            }
+                        },
+                        grid: {
+                            strokeDashArray: 3,
+                            borderColor: '#e0e6ed'
+                        }
+                    };
+                    
+                    const chart = new ApexCharts(document.querySelector("#grupoChart"), options);
+                    chart.render();
+                }
+            } catch (error) {
+                console.error('Error creating grupo chart:', error);
+            }
+        }
+        
+        // Crear gráfico de tendencias
+        async function createTrendChart() {
+            try {
+                const response = await fetch(`${API_BASE}/api/trends`, { headers: HEADERS });
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.length > 0) {
+                    const chartData = data.data.map(item => ({
+                        x: item.fecha_supervision,
+                        y: parseFloat(item.promedio_dia)
+                    }));
+                    
+                    const options = {
+                        series: [{
+                            name: 'Performance Diario',
+                            data: chartData
+                        }],
+                        chart: {
+                            type: 'line',
+                            height: 350,
+                            toolbar: { show: false },
+                            fontFamily: 'Lato, sans-serif'
+                        },
+                        colors: [COLORS.primary],
+                        stroke: {
+                            curve: 'smooth',
+                            width: 3
+                        },
+                        markers: {
+                            size: 4,
+                            colors: [COLORS.primary],
+                            strokeColors: '#fff',
+                            strokeWidth: 2
+                        },
+                        xaxis: {
+                            type: 'datetime',
+                            labels: {
+                                style: {
+                                    fontSize: '12px'
+                                }
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Performance (%)',
+                                style: {
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }
+                            },
+                            labels: {
+                                formatter: function(val) {
+                                    return val.toFixed(0) + '%';
+                                }
+                            }
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            x: {
+                                format: 'dd/MM/yyyy'
+                            },
+                            y: {
+                                formatter: function(val) {
+                                    return val.toFixed(1) + '%';
+                                }
+                            }
+                        },
+                        grid: {
+                            strokeDashArray: 3,
+                            borderColor: '#e0e6ed'
+                        }
+                    };
+                    
+                    const chart = new ApexCharts(document.querySelector("#trendChart"), options);
+                    chart.render();
+                }
+            } catch (error) {
+                console.error('Error creating trend chart:', error);
+            }
+        }
+        
+        // Cargar filtros
+        async function loadFilters() {
+            try {
+                // Cargar estados
+                const estadosResponse = await fetch(`${API_BASE}/api/metadata/estados`, { headers: HEADERS });
+                const estadosData = await estadosResponse.json();
+                
+                if (estadosData.success) {
+                    const estadoSelect = document.getElementById('estadoFilter');
+                    estadosData.data.forEach(estado => {
+                        const option = document.createElement('option');
+                        option.value = estado;
+                        option.textContent = estado;
+                        estadoSelect.appendChild(option);
+                    });
+                }
+                
+                // Cargar grupos
+                const gruposResponse = await fetch(`${API_BASE}/api/metadata/grupos`, { headers: HEADERS });
+                const gruposData = await gruposResponse.json();
+                
+                if (gruposData.success) {
+                    const grupoSelect = document.getElementById('grupoFilter');
+                    gruposData.data.forEach(grupo => {
+                        const option = document.createElement('option');
+                        option.value = grupo;
+                        option.textContent = grupo;
+                        grupoSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading filters:', error);
+            }
+        }
+        
+        // Actualizar status
+        function updateStatus(message, isLoading = false) {
+            const statusEl = document.getElementById('statusIndicator');
+            statusEl.innerHTML = isLoading ? 
+                `<div class="spinner"></div>${message}` : 
+                `✅ ${message}`;
+        }
+        
+        // Inicialización
+        async function initialize() {
+            updateStatus('Inicializando mapas...', true);
+            initializeMaps();
+            
+            updateStatus('Cargando filtros...', true);
+            await loadFilters();
+            
+            updateStatus('Cargando mapa de estados...', true);
+            await createStatesMap();
+            
+            updateStatus('Cargando mapa de sucursales...', true);
+            await createPinMap();
+            
+            updateStatus('Creando gráficos...', true);
+            await createGrupoChart();
+            await createTrendChart();
+            
+            updateStatus('Dashboard cargado exitosamente', false);
+            
+            // Ocultar indicador después de 3 segundos
+            setTimeout(() => {
+                document.getElementById('statusIndicator').style.display = 'none';
+            }, 3000);
+        }
+        
+        // Event listeners para filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            initialize();
+            
+            // Agregar listeners para filtros (implementar según necesidad)
+            document.getElementById('quarterFilter').addEventListener('change', function() {
+                currentFilters.quarter = this.value;
+                // Implementar actualización de datos
+            });
+            
+            document.getElementById('estadoFilter').addEventListener('change', function() {
+                currentFilters.estado = this.value;
+                // Implementar actualización de datos
+            });
+            
+            document.getElementById('grupoFilter').addEventListener('change', function() {
+                currentFilters.grupo = this.value;
+                // Implementar actualización de datos
+            });
+        });
+    </script>
+</body>
+</html>

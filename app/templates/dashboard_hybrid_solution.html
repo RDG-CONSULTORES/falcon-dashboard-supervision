@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Híbrido - Supervision Operativa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #F9FBFC;
+            color: #2E3138;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #E4E8EC;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2E3138;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            background: #509EE3;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .nav-btn:hover {
+            background: #3d8bdb;
+        }
+        
+        .nav-btn.secondary {
+            background: #A663CC;
+        }
+        
+        .nav-btn.secondary:hover {
+            background: #8f4fb8;
+        }
+        
+        .nav-btn.success {
+            background: #28a745;
+        }
+        
+        .nav-btn.success:hover {
+            background: #218838;
+        }
+        
+        .options-section {
+            background: white;
+            margin: 20px;
+            border-radius: 8px;
+            border: 1px solid #E4E8EC;
+            overflow: hidden;
+        }
+        
+        .option-card {
+            padding: 25px;
+            border-bottom: 1px solid #E4E8EC;
+            transition: background 0.2s;
+        }
+        
+        .option-card:last-child {
+            border-bottom: none;
+        }
+        
+        .option-card:hover {
+            background: #f8f9fa;
+        }
+        
+        .option-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2E3138;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .option-description {
+            color: #7C8B8F;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .option-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .pros {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .cons {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .pros h4, .cons h4 {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .pros ul, .cons ul {
+            font-size: 13px;
+            margin-left: 15px;
+        }
+        
+        .recommended {
+            border: 2px solid #28a745;
+            background: #f8fff9;
+        }
+        
+        .badge {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .warning-badge {
+            background: #ffc107;
+            color: #856404;
+        }
+        
+        .info-section {
+            background: #d1ecf1;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #509EE3;
+        }
+        
+        .info-section h3 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+        
+        .info-section p {
+            color: #0c5460;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+            
+            .option-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            🎯 Dashboard Supervision Operativa - Soluciones
+        </h1>
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn">🏠 Inicio</a>
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h3>📊 Situación Actual: Metabase Embedding Bloqueado</h3>
+        <p>Tu dashboard de Metabase no permite embedding en iframes por configuración de seguridad. Te presento las mejores soluciones disponibles:</p>
+    </div>
+    
+    <div class="options-section">
+        <!-- Opción 1: Enlace Directo -->
+        <div class="option-card recommended">
+            <div class="option-title">
+                🚀 Opción 1: Enlace Directo a Metabase 
+                <span class="badge">RECOMENDADO</span>
+            </div>
+            <div class="option-description">
+                Abrir el dashboard de Metabase en una nueva pestaña. Solución inmediata y 100% funcional.
+            </div>
+            <div class="option-buttons">
+                <a href="https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68" 
+                   target="_blank" class="nav-btn success">
+                    🎯 Abrir Dashboard Metabase
+                </a>
+            </div>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>✅ Ventajas:</h4>
+                    <ul>
+                        <li>Funciona inmediatamente</li>
+                        <li>Todos los filtros de Metabase</li>
+                        <li>Datos en tiempo real</li>
+                        <li>Interfaz profesional</li>
+                        <li>No requiere configuración</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Consideraciones:</h4>
+                    <ul>
+                        <li>Se abre en nueva pestaña</li>
+                        <li>Usuario sale de tu app</li>
+                        <li>Menos integración visual</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Opción 2: Dashboard JavaScript -->
+        <div class="option-card">
+            <div class="option-title">
+                🧪 Opción 2: Dashboard JavaScript Nativo
+                <span class="badge warning-badge">ALTERNATIVO</span>
+            </div>
+            <div class="option-description">
+                Dashboard creado con JavaScript que usa tu API y base de datos directamente. Integración perfecta.
+            </div>
+            <div class="option-buttons">
+                <a href="/dashboard/simple" class="nav-btn">
+                    📊 Ver Dashboard JavaScript
+                </a>
+            </div>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>✅ Ventajas:</h4>
+                    <ul>
+                        <li>Integración perfecta en tu app</li>
+                        <li>Control total del diseño</li>
+                        <li>Filtros funcionales</li>
+                        <li>Mapas interactivos</li>
+                        <li>Personalizable 100%</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Consideraciones:</h4>
+                    <ul>
+                        <li>Menos funciones que Metabase</li>
+                        <li>Requiere mantenimiento</li>
+                        <li>Interfaz más básica</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Opción 3: Configurar Embedding -->
+        <div class="option-card">
+            <div class="option-title">
+                ⚙️ Opción 3: Configurar Embedding en Metabase
+                <span class="badge warning-badge">TÉCNICO</span>
+            </div>
+            <div class="option-description">
+                Configurar Metabase para permitir embedding. Requiere acceso administrativo.
+            </div>
+            <div class="option-buttons">
+                <a href="https://rdg-consultores.metabaseapp.com/admin" target="_blank" class="nav-btn secondary">
+                    ⚙️ Admin Panel Metabase
+                </a>
+                <button onclick="showEmbeddingSteps()" class="nav-btn">
+                    📋 Ver Pasos
+                </button>
+            </div>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>✅ Ventajas:</h4>
+                    <ul>
+                        <li>Iframe integrado en tu app</li>
+                        <li>Todas las funciones de Metabase</li>
+                        <li>Filtros avanzados</li>
+                        <li>Interfaz profesional</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Consideraciones:</h4>
+                    <ul>
+                        <li>Requiere acceso admin</li>
+                        <li>Configuración técnica</li>
+                        <li>Puede fallar por seguridad</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="embeddingSteps" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                <h4>📋 Pasos para Configurar Embedding:</h4>
+                <ol style="margin-left: 20px; line-height: 1.6;">
+                    <li>Abrir <strong>Metabase Admin Panel</strong></li>
+                    <li>Ir a <strong>Settings → Embedding</strong></li>
+                    <li>Activar <strong>"Enable embedding"</strong></li>
+                    <li>Ir a tu dashboard</li>
+                    <li>Clic en <strong>⚙️ → Sharing and embedding</strong></li>
+                    <li>Activar <strong>"Enable embedding for this dashboard"</strong></li>
+                    <li>Copiar el código iframe generado</li>
+                    <li>Reemplazar el iframe en nuestro código</li>
+                </ol>
+            </div>
+        </div>
+        
+        <!-- Opción 4: Solución Híbrida -->
+        <div class="option-card">
+            <div class="option-title">
+                🔄 Opción 4: Solución Híbrida (Actual)
+                <span class="badge">IMPLEMENTADO</span>
+            </div>
+            <div class="option-description">
+                Intentar iframe de Metabase, si falla automáticamente mostrar enlace directo. Lo mejor de ambos mundos.
+            </div>
+            <div class="option-buttons">
+                <a href="/dashboard/calificacion-metabase" class="nav-btn">
+                    🔄 Ver Dashboard Híbrido
+                </a>
+            </div>
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>✅ Ventajas:</h4>
+                    <ul>
+                        <li>Siempre funciona</li>
+                        <li>Intenta la mejor experiencia</li>
+                        <li>Fallback automático</li>
+                        <li>Sin configuración</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Consideraciones:</h4>
+                    <ul>
+                        <li>Experiencia no predecible</li>
+                        <li>Puede confundir usuarios</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h3>💡 Mi Recomendación:</h3>
+        <p><strong>Usa la Opción 1 (Enlace Directo)</strong> por ahora. Es profesional, funciona perfecto, y todos los filtros de Metabase están disponibles. Si más adelante quieres integración total, puedes configurar el embedding o mejorar el dashboard JavaScript.</p>
+    </div>
+
+    <script>
+        function showEmbeddingSteps() {
+            const steps = document.getElementById('embeddingSteps');
+            if (steps.style.display === 'none') {
+                steps.style.display = 'block';
+            } else {
+                steps.style.display = 'none';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard híbrido solutions initialized');
+        });
+    </script>
+</body>
+</html>

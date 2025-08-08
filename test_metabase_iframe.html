@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Metabase Iframe</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .iframe-container { width: 100%; height: 600px; border: 1px solid #ccc; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Metabase Iframe Loading</h1>
+    
+    <div id="status" class="status info">🔄 Cargando iframe de Metabase...</div>
+    
+    <h3>📊 Metabase Dashboard:</h3>
+    <div class="iframe-container">
+        <iframe
+            id="metabaseFrame"
+            src="https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68"
+            width="100%"
+            height="600"
+            frameborder="0"
+            allowtransparency="true"
+            allowfullscreen="true"
+            allow="fullscreen"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+            onload="frameLoaded()"
+            onerror="frameError()"
+        ></iframe>
+    </div>
+    
+    <h3>📋 Información de Prueba:</h3>
+    <ul>
+        <li><strong>URL:</strong> https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68</li>
+        <li><strong>Tipo:</strong> Dashboard público de Metabase</li>
+        <li><strong>Sandbox:</strong> allow-scripts allow-same-origin allow-forms allow-popups allow-presentation</li>
+    </ul>
+
+    <script>
+        let loadTimeout;
+        
+        function frameLoaded() {
+            clearTimeout(loadTimeout);
+            document.getElementById('status').textContent = '✅ Iframe cargado exitosamente';
+            document.getElementById('status').className = 'status success';
+            console.log('✅ Metabase iframe loaded');
+        }
+        
+        function frameError() {
+            clearTimeout(loadTimeout);
+            document.getElementById('status').textContent = '❌ Error cargando iframe';
+            document.getElementById('status').className = 'status error';
+            console.error('❌ Error loading Metabase iframe');
+        }
+        
+        // Auto-success after 10 seconds
+        loadTimeout = setTimeout(() => {
+            if (document.getElementById('status').className.includes('info')) {
+                document.getElementById('status').textContent = '⏰ Timeout - El iframe puede estar cargando lentamente';
+                document.getElementById('status').className = 'status info';
+            }
+        }, 10000);
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Test page initialized');
+            console.log('📊 Testing Metabase URL:', 'https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68');
+        });
+    </script>
+</body>
+</html>

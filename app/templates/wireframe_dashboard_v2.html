@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe V2 - Dashboard Supervisión Operativa</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .tab-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .tab-inactive {
+            background-color: white;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        
+        .filter-dropdown {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        /* Heat Map Color Scheme (70% límite rojo) */
+        .heat-excellent { background-color: #059669; } /* 90%+ */
+        .heat-good { background-color: #10b981; }      /* 80-90% */  
+        .heat-warning { background-color: #f59e0b; }   /* 70-80% */
+        .heat-critical { background-color: #dc2626; } /* <70% ROJO */
+        .heat-no-data { background-color: #e5e7eb; }  /* Sin datos */
+        
+        /* Top/Bottom indicator styles */
+        .top-indicator {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .bottom-indicator {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+        }
+        
+        /* Animation for demo */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Hide sections by default */
+        .dashboard-section {
+            display: none;
+        }
+        
+        .dashboard-section.active {
+            display: block;
+        }
+        
+        /* New Styles for improved layout */
+        .indicator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .top-bottom-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .top-bottom-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo and Title -->
+                    <div class="flex items-center">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <h1 id="dynamicLegend" class="text-xl font-semibold text-gray-900">Supervisión Operativa Q3 2025 - EPL CAS</h1>
+                        </div>
+                    </div>
+                    
+                    <!-- Global Filters -->
+                    <div class="flex items-center space-x-3">
+                        <select id="quarterFilter" class="filter-dropdown bg-white border border-gray-300 text-gray-900 text-sm rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateDynamicLegend()">
+                            <option value="Q3" selected>Q3 2025</option>
+                            <option value="Q2">Q2 2025</option>
+                            <option value="Q1">Q1 2025</option>
+                            <option value="Q4">Q4 2024</option>
+                            <option value="TODOS">TODOS (Calificaciones de la Marca)</option>
+                        </select>
+                        
+                        <select id="stateFilter" class="filter-dropdown bg-white border border-gray-300 text-gray-900 text-sm rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateDynamicLegend()">
+                            <option value="todos" selected>Todos los Estados</option>
+                            <option value="Coahuila">Coahuila</option>
+                            <option value="Coahuila de Zaragoza">Coahuila de Zaragoza</option>
+                            <option value="Durango">Durango</option>
+                            <option value="Michoacán">Michoacán</option>
+                            <option value="Michoacán de Ocampo">Michoacán de Ocampo</option>
+                            <option value="Nuevo León">Nuevo León</option>
+                            <option value="Querétaro">Querétaro</option>
+                            <option value="Sinaloa">Sinaloa</option>
+                            <option value="Tamaulipas">Tamaulipas</option>
+                        </select>
+                        
+                        <select id="groupFilter" class="filter-dropdown bg-white border border-gray-300 text-gray-900 text-sm rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateDynamicLegend()">
+                            <option value="todos" selected>Todos los Grupos</option>
+                            <option value="CRR">CRR</option>
+                            <option value="EFM">EFM</option>
+                            <option value="EPL SO">EPL SO</option>
+                            <option value="EXPO">EXPO</option>
+                            <option value="GRUPO CANTERA ROSA (MORELIA)">GRUPO CANTERA ROSA (MORELIA)</option>
+                            <option value="GRUPO CENTRITO">GRUPO CENTRITO</option>
+                            <option value="GRUPO MATAMOROS">GRUPO MATAMOROS</option>
+                            <option value="GRUPO NUEVO LAREDO (RUELAS)">GRUPO NUEVO LAREDO (RUELAS)</option>
+                            <option value="GRUPO PIEDRAS NEGRAS">GRUPO PIEDRAS NEGRAS</option>
+                            <option value="GRUPO RIO BRAVO">GRUPO RIO BRAVO</option>
+                            <option value="GRUPO SABINAS HIDALGO">GRUPO SABINAS HIDALGO</option>
+                            <option value="GRUPO SALTILLO">GRUPO SALTILLO</option>
+                            <option value="OCHTER TAMPICO">OCHTER TAMPICO</option>
+                            <option value="OGAS">OGAS</option>
+                            <option value="PLOG LAGUNA">PLOG LAGUNA</option>
+                            <option value="PLOG NUEVO LEON">PLOG NUEVO LEON</option>
+                            <option value="PLOG QUERETARO">PLOG QUERETARO</option>
+                            <option value="RAP">RAP</option>
+                            <option value="TEC">TEC</option>
+                            <option value="TEPEYAC">TEPEYAC</option>
+                        </select>
+                        
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Navigation Tabs -->
+        <div class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex space-x-4 py-4">
+                    <button onclick="showDashboard('calificacion')" id="tab-calificacion" class="tab-active px-4 py-2 rounded-lg font-medium text-sm transition-all">
+                        📈 Calificación General
+                    </button>
+                    <button onclick="showDashboard('indicadores')" id="tab-indicadores" class="tab-inactive px-4 py-2 rounded-lg font-medium text-sm transition-all">
+                        📊 29 Indicadores
+                    </button>
+                    <button onclick="showDashboard('admin')" id="tab-admin" class="tab-inactive px-4 py-2 rounded-lg font-medium text-sm transition-all">
+                        ⚙️ Administración
+                    </button>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Dashboard Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Dashboard 1: Calificación General -->
+            <div id="dashboard-calificacion" class="dashboard-section active">
+                <!-- KPIs Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- KPI 1 -->
+                    <div class="kpi-card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-blue-100 rounded-lg">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">
+                                ↗ +2.1%
+                            </span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900">87.4%</h3>
+                        <p class="text-sm text-gray-600 mt-1">Promedio General</p>
+                        <p class="text-xs text-gray-500 mt-2">vs. Q2 2025</p>
+                    </div>
+                    
+                    <!-- KPI 2 -->
+                    <div class="kpi-card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-green-100 rounded-lg">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">
+                                ↗ +5.2%
+                            </span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900">1,234</h3>
+                        <p class="text-sm text-gray-600 mt-1">Sucursales Evaluadas</p>
+                        <p class="text-xs text-gray-500 mt-2">vs. Q2 2025</p>
+                    </div>
+                    
+                    <!-- KPI 3 -->
+                    <div class="kpi-card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-purple-100 rounded-lg">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-red-600 bg-red-100 px-3 py-1 rounded-full">
+                                ↘ -1
+                            </span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900">28</h3>
+                        <p class="text-sm text-gray-600 mt-1">Estados Activos</p>
+                        <p class="text-xs text-gray-500 mt-2">vs. Q2 2025</p>
+                    </div>
+                </div>
+                
+                <!-- Maps Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Choropleth Map with Updated Heat Scale -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Distribución por Estados (Heat Map)</h3>
+                        <div id="choropleth-map" class="map-container bg-gray-100"></div>
+                        <!-- Updated Legend with 70% Red Threshold -->
+                        <div class="flex items-center justify-center gap-4 mt-4 text-xs">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded heat-excellent"></div>
+                                <span>90%+</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded heat-good"></div>
+                                <span>80-90%</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded heat-warning"></div>
+                                <span>70-80%</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded heat-critical"></div>
+                                <span class="font-semibold">&lt;70% CRÍTICO</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded heat-no-data"></div>
+                                <span>Sin datos</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pin Map -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Ubicación de Sucursales</h3>
+                        <div id="pin-map" class="map-container bg-gray-100"></div>
+                        <p class="text-xs text-gray-500 mt-4 text-center">Click en los pins para ver detalles de cada sucursal</p>
+                    </div>
+                </div>
+                
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Bar Chart by State -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Calificación por Estado</h3>
+                        <div id="chart-estados" style="height: 350px;"></div>
+                    </div>
+                    
+                    <!-- Bar Chart by Group -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Calificación por Grupo Operativo</h3>
+                        <div id="chart-grupos" style="height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard 2: 29 Indicadores (MEJORADO) -->
+            <div id="dashboard-indicadores" class="dashboard-section">
+                
+                <!-- TOP 5 y BOTTOM 5 Indicadores -->
+                <div class="top-bottom-container mb-8">
+                    <!-- TOP 5 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white">
+                            <h3 class="text-lg font-semibold flex items-center">
+                                🏆 Top 5 Mejores Indicadores
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 top-indicator rounded-lg">
+                                    <span class="font-medium text-sm">TIEMPOS DE SERVICIO</span>
+                                    <span class="font-bold text-lg">100%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 top-indicator rounded-lg opacity-90">
+                                    <span class="font-medium text-sm">ALMACÉN QUÍMICOS</span>
+                                    <span class="font-bold text-lg">100%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 top-indicator rounded-lg opacity-80">
+                                    <span class="font-medium text-sm">LAVADO DE UTENSILIOS</span>
+                                    <span class="font-bold text-lg">100%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 top-indicator rounded-lg opacity-70">
+                                    <span class="font-medium text-sm">BARRA DE SALSAS</span>
+                                    <span class="font-bold text-lg">99.3%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 top-indicator rounded-lg opacity-60">
+                                    <span class="font-medium text-sm">PROCESO MARINADO</span>
+                                    <span class="font-bold text-lg">97.9%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTTOM 5 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
+                            <h3 class="text-lg font-semibold flex items-center">
+                                ⚠️ Bottom 5 Indicadores Críticos
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bottom-indicator rounded-lg">
+                                    <span class="font-medium text-sm">FREIDORAS</span>
+                                    <span class="font-bold text-lg">69.6%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bottom-indicator rounded-lg opacity-90">
+                                    <span class="font-medium text-sm">EXTERIOR SUCURSAL</span>
+                                    <span class="font-bold text-lg">71.9%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bottom-indicator rounded-lg opacity-80">
+                                    <span class="font-medium text-sm">FREIDORA DE PAPA</span>
+                                    <span class="font-bold text-lg">72.0%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bottom-indicator rounded-lg opacity-70">
+                                    <span class="font-medium text-sm">AVISO FUNCIONAMIENTO</span>
+                                    <span class="font-bold text-lg">74.9%</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bottom-indicator rounded-lg opacity-60">
+                                    <span class="font-medium text-sm">ASADORES</span>
+                                    <span class="font-bold text-lg">81.1%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Pills - Necesita los nombres reales de las categorías -->
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100">
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-sm text-gray-600 font-medium mr-2">Filtrar por categoría:</span>
+                        <button class="px-4 py-2 rounded-full bg-blue-600 text-white text-sm font-medium">Todos</button>
+                        <button class="px-4 py-2 rounded-full bg-white text-gray-700 border border-gray-300 text-sm font-medium hover:bg-gray-50">Cocina</button>
+                        <button class="px-4 py-2 rounded-full bg-white text-gray-700 border border-gray-300 text-sm font-medium hover:bg-gray-50">Servicio</button>
+                        <button class="px-4 py-2 rounded-full bg-white text-gray-700 border border-gray-300 text-sm font-medium hover:bg-gray-50">Almacén</button>
+                        <button class="px-4 py-2 rounded-full bg-white text-gray-700 border border-gray-300 text-sm font-medium hover:bg-gray-50">Higiene</button>
+                        <button class="px-4 py-2 rounded-full bg-white text-gray-700 border border-gray-300 text-sm font-medium hover:bg-gray-50">Instalaciones</button>
+                    </div>
+                </div>
+                
+                <!-- Radar Chart -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Vista General de Indicadores</h3>
+                    <div id="radar-chart" style="height: 400px;"></div>
+                </div>
+                
+                <!-- Heat Map de Indicadores con límite 70% -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Heat Map de 29 Indicadores (70% = Límite Crítico)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        <!-- Top 29 Indicadores Reales con Heat Map -->
+                        <div class="p-3 rounded-lg heat-excellent text-white text-center">
+                            <div class="text-xs font-medium">TIEMPOS DE SERVICIO</div>
+                            <div class="text-sm font-bold">100%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-excellent text-white text-center">
+                            <div class="text-xs font-medium">ALMACÉN QUÍMICOS</div>
+                            <div class="text-sm font-bold">100%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-excellent text-white text-center">
+                            <div class="text-xs font-medium">LAVADO UTENSILIOS</div>
+                            <div class="text-sm font-bold">100%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-excellent text-white text-center">
+                            <div class="text-xs font-medium">BARRA DE SALSAS</div>
+                            <div class="text-sm font-bold">99.3%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-excellent text-white text-center">
+                            <div class="text-xs font-medium">PROCESO MARINADO</div>
+                            <div class="text-sm font-bold">97.9%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">REFRIGERADORES</div>
+                            <div class="text-sm font-bold">96.0%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">BARRA DE SERVICIO</div>
+                            <div class="text-sm font-bold">95.6%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">ALMACÉN JARABES</div>
+                            <div class="text-sm font-bold">95.5%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">ALMACÉN GENERAL</div>
+                            <div class="text-sm font-bold">95.4%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">PLANCHA QUESADILLAS</div>
+                            <div class="text-sm font-bold">94.2%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">BAÑO CLIENTES</div>
+                            <div class="text-sm font-bold">93.0%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">CUARTO FRÍO 2</div>
+                            <div class="text-sm font-bold">92.9%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">ÁREA COCINA</div>
+                            <div class="text-sm font-bold">91.6%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">CUARTO FRÍO 1</div>
+                            <div class="text-sm font-bold">90.1%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">DISPENSADOR</div>
+                            <div class="text-sm font-bold">90.0%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">LAVADO DE MANOS</div>
+                            <div class="text-sm font-bold">89.1%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">CONSERVADOR PAPA</div>
+                            <div class="text-sm font-bold">88.8%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">MÁQUINA DE HIELO</div>
+                            <div class="text-sm font-bold">86.7%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">HORNOS</div>
+                            <div class="text-sm font-bold">84.9%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">BAÑO EMPLEADOS</div>
+                            <div class="text-sm font-bold">83.4%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">CONGELADOR PAPA</div>
+                            <div class="text-sm font-bold">83.2%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">ASADORES</div>
+                            <div class="text-sm font-bold">81.1%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-warning text-white text-center">
+                            <div class="text-xs font-medium">AVISO FUNCIONAM.</div>
+                            <div class="text-sm font-bold">74.9%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-warning text-white text-center">
+                            <div class="text-xs font-medium">FREIDORA DE PAPA</div>
+                            <div class="text-sm font-bold">72.0%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-warning text-white text-center">
+                            <div class="text-xs font-medium">EXTERIOR SUCURSAL</div>
+                            <div class="text-sm font-bold">71.9%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-critical text-white text-center">
+                            <div class="text-xs font-medium">FREIDORAS</div>
+                            <div class="text-sm font-bold">69.6%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-excellent text-white text-center">
+                            <div class="text-xs font-medium">CAJAS TOTOPO</div>
+                            <div class="text-sm font-bold">100%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-excellent text-white text-center">
+                            <div class="text-xs font-medium">COMEDOR</div>
+                            <div class="text-sm font-bold">99.3%</div>
+                        </div>
+                        <div class="p-3 rounded-lg heat-good text-white text-center">
+                            <div class="text-xs font-medium">MARINADO ÁREA</div>
+                            <div class="text-sm font-bold">88.0%</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center gap-4 mt-6 text-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded heat-excellent"></div>
+                            <span>Excelente (90%+)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded heat-good"></div>
+                            <span>Bueno (80-90%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded heat-warning"></div>
+                            <span>Alerta (70-80%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded heat-critical"></div>
+                            <span class="font-semibold">CRÍTICO (&lt;70%)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Indicators Table - Necesita datos reales -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Detalle de 29 Indicadores Principales</h3>
+                        <p class="text-sm text-gray-600 mt-1">Datos extraídos de la base de datos PostgreSQL - 252,415 evaluaciones</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Indicador</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actual</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Meta</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tendencia</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">TIEMPOS DE SERVICIO</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Servicio</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">100%</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center text-sm text-gray-600">90%</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Excelente</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-green-600">↗ +0.5%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">FREIDORAS</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Cocina</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">69.6%</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center text-sm text-gray-600">85%</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">⚠ CRÍTICO</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-red-600">↘ -3.2%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">EXTERIOR SUCURSAL</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Instalaciones</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">71.9%</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center text-sm text-gray-600">80%</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">⚠ Alerta</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-orange-600">↘ -1.8%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">ALMACÉN QUÍMICOS</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Almacén</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">100%</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center text-sm text-gray-600">95%</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Excelente</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-green-600">→ 0.0%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">BARRA DE SALSAS</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">Servicio</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">99.3%</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center text-sm text-gray-600">95%</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Excelente</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-green-600">↗ +1.2%</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard 3: Administración (Solo para Usuario) -->
+            <div id="dashboard-admin" class="dashboard-section">
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-amber-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div>
+                            <h3 class="text-lg font-semibold text-amber-800">Sección Privada</h3>
+                            <p class="text-sm text-amber-700">Solo accesible por el administrador del sistema</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- WhatsApp Configuration -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">⚙️ Configuración de Alertas WhatsApp</h3>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Configuración General -->
+                        <div class="space-y-4">
+                            <h4 class="font-medium text-gray-900">Configuración General</h4>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Día de Envío Semanal</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="monday">Lunes</option>
+                                    <option value="friday" selected>Viernes</option>
+                                    <option value="sunday">Domingo</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Hora de Envío</label>
+                                <input type="time" value="09:00" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Umbral de Alerta (%)</label>
+                                <input type="number" value="70" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                        
+                        <!-- Lista de Números -->
+                        <div class="space-y-4">
+                            <h4 class="font-medium text-gray-900">Números de WhatsApp</h4>
+                            
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div>
+                                        <span class="font-medium">+52 81 1234-5678</span>
+                                        <div class="text-sm text-gray-600">Director General</div>
+                                    </div>
+                                    <button class="text-red-600 hover:text-red-800">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div>
+                                        <span class="font-medium">+52 33 9876-5432</span>
+                                        <div class="text-sm text-gray-600">Supervisor Regional</div>
+                                    </div>
+                                    <button class="text-red-600 hover:text-red-800">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Add new number form -->
+                                <div class="flex gap-2">
+                                    <input type="tel" placeholder="+52 81 1234-5678" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    <input type="text" placeholder="Nombre/Cargo" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Agregar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 mt-6">
+                        <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Guardar Configuración</button>
+                        <button class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Probar Envío</button>
+                        <button class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Ver Historial</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Dynamic Legend Update Function
+        function updateDynamicLegend() {
+            const quarter = document.getElementById('quarterFilter').value;
+            const state = document.getElementById('stateFilter').value;
+            const group = document.getElementById('groupFilter').value;
+            
+            let legendText;
+            
+            // Handle TODOS quarter filter
+            if (quarter === 'TODOS') {
+                legendText = 'Supervisión Operativa - Calificaciones Generales Marca EPL CAS';
+            } else {
+                legendText = `Supervisión Operativa ${quarter} 2025`;
+                
+                // Add specific context based on filters
+                if (state !== 'todos' && group !== 'todos') {
+                    // Both filters active
+                    const stateName = document.getElementById('stateFilter').selectedOptions[0].text;
+                    const groupName = document.getElementById('groupFilter').selectedOptions[0].text;
+                    legendText += ` - ${stateName} - ${groupName}`;
+                } else if (state !== 'todos') {
+                    // Only state filter active
+                    const stateName = document.getElementById('stateFilter').selectedOptions[0].text;
+                    legendText += ` - ${stateName}`;
+                } else if (group !== 'todos') {
+                    // Only group filter active
+                    const groupName = document.getElementById('groupFilter').selectedOptions[0].text;
+                    legendText += ` - ${groupName}`;
+                } else {
+                    // No specific filters, show current context
+                    legendText += ' - Calificación Actual';
+                }
+            }
+            
+            document.getElementById('dynamicLegend').textContent = legendText;
+            
+            // Update maps with filtered data
+            updateMapsWithFilters(quarter, state, group);
+            
+            // Update dashboard data based on filters
+            console.log('Filters updated:', { quarter, state, group });
+        }
+        
+        // Update maps based on filters
+        function updateMapsWithFilters(quarter, state, group) {
+            // Filter and update pin markers
+            filterPinMarkers(quarter, state, group);
+            
+            // Auto-zoom pin map based on filters
+            if (group !== 'todos') {
+                autoZoomToGroup(group);
+            } else if (state !== 'todos') {
+                autoZoomToState(state);
+            } else {
+                // Reset to full view
+                if (window.pinMap) {
+                    window.pinMap.setView([24.20, -102.99], 5);
+                }
+            }
+        }
+        
+        // Filter pin markers based on selected filters
+        function filterPinMarkers(quarter, state, group) {
+            if (!window.pinMap || !window.sucursalesData) return;
+            
+            // Get all layers (markers) from the map
+            window.pinMap.eachLayer(layer => {
+                if (layer.sucursalData) {
+                    const sucursal = layer.sucursalData;
+                    let shouldShow = true;
+                    
+                    // Apply filters
+                    if (group !== 'todos' && sucursal.grupo !== group) {
+                        shouldShow = false;
+                    }
+                    
+                    if (state !== 'todos' && sucursal.estado !== state) {
+                        shouldShow = false;
+                    }
+                    
+                    // Show/hide marker
+                    if (shouldShow) {
+                        layer.setStyle({ opacity: 1, fillOpacity: 0.8 });
+                    } else {
+                        layer.setStyle({ opacity: 0.3, fillOpacity: 0.2 });
+                    }
+                }
+            });
+        }
+        
+        // Auto-zoom to group locations (calculate from actual data)
+        function autoZoomToGroup(groupName) {
+            if (!window.sucursalesData || !window.pinMap) return;
+            
+            // Find all sucursales for this group
+            const groupSucursales = window.sucursalesData.filter(s => s.grupo === groupName);
+            
+            if (groupSucursales.length === 0) return;
+            
+            if (groupSucursales.length === 1) {
+                // Single location, zoom in close
+                const sucursal = groupSucursales[0];
+                window.pinMap.setView([sucursal.lat, sucursal.lng], 12);
+            } else {
+                // Multiple locations, calculate bounds
+                const latitudes = groupSucursales.map(s => s.lat);
+                const longitudes = groupSucursales.map(s => s.lng);
+                
+                const bounds = L.latLngBounds(
+                    [Math.min(...latitudes), Math.min(...longitudes)],
+                    [Math.max(...latitudes), Math.max(...longitudes)]
+                );
+                
+                window.pinMap.fitBounds(bounds, { padding: [20, 20] });
+            }
+        }
+        
+        // Auto-zoom to state (calculate from actual data)
+        function autoZoomToState(stateName) {
+            if (!window.sucursalesData || !window.pinMap) return;
+            
+            // Find all sucursales for this state
+            const stateSucursales = window.sucursalesData.filter(s => s.estado === stateName);
+            
+            if (stateSucursales.length === 0) return;
+            
+            if (stateSucursales.length === 1) {
+                // Single location, zoom in moderately
+                const sucursal = stateSucursales[0];
+                window.pinMap.setView([sucursal.lat, sucursal.lng], 10);
+            } else {
+                // Multiple locations, calculate bounds
+                const latitudes = stateSucursales.map(s => s.lat);
+                const longitudes = stateSucursales.map(s => s.lng);
+                
+                const bounds = L.latLngBounds(
+                    [Math.min(...latitudes), Math.min(...longitudes)],
+                    [Math.max(...latitudes), Math.max(...longitudes)]
+                );
+                
+                window.pinMap.fitBounds(bounds, { padding: [30, 30] });
+            }
+        }
+        
+        // Dashboard Navigation
+        function showDashboard(dashboardType) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.classList.remove('tab-active');
+                tab.classList.add('tab-inactive');
+            });
+            
+            // Show selected section
+            document.getElementById(`dashboard-${dashboardType}`).classList.add('active');
+            
+            // Activate selected tab
+            const activeTab = document.getElementById(`tab-${dashboardType}`);
+            activeTab.classList.remove('tab-inactive');
+            activeTab.classList.add('tab-active');
+            
+            // Initialize charts if needed
+            if (dashboardType === 'calificacion') {
+                initializeCalificacionCharts();
+            } else if (dashboardType === 'indicadores') {
+                initializeIndicadoresCharts();
+            }
+        }
+        
+        // Initialize Calificacion Charts
+        function initializeCalificacionCharts() {
+            // Estados Chart
+            const estadosChart = new ApexCharts(document.querySelector("#chart-estados"), {
+                series: [{
+                    name: 'Calificación %',
+                    data: [87.2, 85.4, 92.1, 78.3, 88.7]
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350,
+                    toolbar: { show: false }
+                },
+                colors: ['#3b82f6'],
+                xaxis: {
+                    categories: ['Nuevo León', 'Coahuila', 'Tamaulipas', 'Sinaloa', 'Sonora']
+                },
+                yaxis: {
+                    min: 0,
+                    max: 100,
+                    labels: {
+                        formatter: function (val) {
+                            return val + "%";
+                        }
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: false,
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) {
+                        return val + "%";
+                    }
+                }
+            });
+            estadosChart.render();
+            
+            // Grupos Chart
+            const gruposChart = new ApexCharts(document.querySelector("#chart-grupos"), {
+                series: [{
+                    name: 'Calificación %',
+                    data: [89.2, 85.7, 91.3, 82.8]
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350,
+                    toolbar: { show: false }
+                },
+                colors: ['#10b981'],
+                xaxis: {
+                    categories: ['Grupo Norte', 'Grupo Sur', 'Grupo Centro', 'Grupo Pacífico']
+                },
+                yaxis: {
+                    min: 0,
+                    max: 100,
+                    labels: {
+                        formatter: function (val) {
+                            return val + "%";
+                        }
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: false,
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) {
+                        return val + "%";
+                    }
+                }
+            });
+            gruposChart.render();
+        }
+        
+        // Initialize Indicadores Charts
+        function initializeIndicadoresCharts() {
+            // Radar Chart
+            const radarChart = new ApexCharts(document.querySelector("#radar-chart"), {
+                series: [{
+                    name: 'Indicadores',
+                    data: [95, 85, 75, 92, 88, 79, 90, 82, 94, 77, 89, 83, 91, 78, 87, 85, 92, 74, 88, 86, 93, 81, 89, 84, 90, 76, 95, 80, 87]
+                }],
+                chart: {
+                    height: 400,
+                    type: 'radar',
+                },
+                xaxis: {
+                    categories: [
+                        '[Indicador 1]', '[Indicador 2]', '[Indicador 3]', '[Indicador 4]', '[Indicador 5]',
+                        '[Indicador 6]', '[Indicador 7]', '[Indicador 8]', '[Indicador 9]', '[Indicador 10]',
+                        '[Indicador 11]', '[Indicador 12]', '[Indicador 13]', '[Indicador 14]', '[Indicador 15]',
+                        '[Indicador 16]', '[Indicador 17]', '[Indicador 18]', '[Indicador 19]', '[Indicador 20]',
+                        '[Indicador 21]', '[Indicador 22]', '[Indicador 23]', '[Indicador 24]', '[Indicador 25]',
+                        '[Indicador 26]', '[Indicador 27]', '[Indicador 28]', '[Indicador 29]'
+                    ]
+                },
+                yaxis: {
+                    min: 0,
+                    max: 100
+                },
+                colors: ['#3b82f6'],
+                markers: {
+                    size: 4
+                }
+            });
+            radarChart.render();
+        }
+        
+        // Initialize maps with real data
+        function initializeMaps() {
+            initializeChoroplethMap();
+            initializePinMap();
+        }
+        
+        // Initialize Choropleth Map
+        function initializeChoroplethMap() {
+            const choroplethMap = L.map('choropleth-map').setView([24.20, -102.99], 5);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(choroplethMap);
+            
+            // Load Mexico GeoJSON
+            fetch('/static/js/mexico-angel-geojson-new.js')
+                .then(response => response.json())
+                .then(geoJsonData => {
+                    L.geoJSON(geoJsonData, {
+                        style: function(feature) {
+                            const stateName = feature.properties.name || feature.properties.NAME;
+                            const score = getStateScore(stateName);
+                            return {
+                                fillColor: getHeatMapColor(score),
+                                weight: 1,
+                                opacity: 1,
+                                color: 'white',
+                                fillOpacity: 0.7
+                            };
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const stateName = feature.properties.name || feature.properties.NAME;
+                            const score = getStateScore(stateName);
+                            layer.bindPopup(`
+                                <div class="popup-content">
+                                    <div class="popup-title">${stateName}</div>
+                                    <div class="popup-score">Calificación: ${score}%</div>
+                                </div>
+                            `);
+                        }
+                    }).addTo(choroplethMap);
+                })
+                .catch(error => {
+                    console.error('Error loading GeoJSON:', error);
+                    document.getElementById('choropleth-map').innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">Error cargando mapa de estados</div>';
+                });
+            
+            window.choroplethMap = choroplethMap;
+        }
+        
+        // Initialize Pin Map with real sucursales from API
+        async function initializePinMap() {
+            const pinMap = L.map('pin-map').setView([24.20, -102.99], 5);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(pinMap);
+            
+            // Show loading message
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'absolute top-2 left-2 bg-white px-3 py-1 rounded shadow text-sm';
+            loadingDiv.textContent = 'Cargando sucursales...';
+            document.getElementById('pin-map').appendChild(loadingDiv);
+            
+            try {
+                // Load real sucursales data from API
+                const response = await fetch('/api/wireframe/sucursales');
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.length > 0) {
+                    loadingDiv.textContent = `${data.count} sucursales cargadas`;
+                    
+                    // Store data globally for filtering
+                    window.sucursalesData = data.data;
+                    
+                    // Add markers for each sucursal
+                    data.data.forEach(sucursal => {
+                        const color = getMarkerColor(sucursal.calificacion);
+                        const marker = L.circleMarker([sucursal.lat, sucursal.lng], {
+                            radius: 8,
+                            fillColor: color,
+                            color: 'white',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(pinMap);
+                        
+                        // Store marker reference for filtering
+                        marker.sucursalData = sucursal;
+                        
+                        const areasHtml = sucursal.areasOportunidad.map(area => `<li>${area}</li>`).join('');
+                        
+                        marker.bindPopup(`
+                            <div class="popup-content" style="min-width: 280px;">
+                                <div class="popup-title">${sucursal.name}</div>
+                                <div class="popup-info">Grupo: ${sucursal.grupo}</div>
+                                <div class="popup-info">${sucursal.ciudad}, ${sucursal.estado}</div>
+                                <div class="popup-info">Última Supervisión: ${sucursal.trimestre}</div>
+                                <div class="popup-score">⭐ ${sucursal.calificacion}%</div>
+                                <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                                    <strong style="color: #f59e0b;">🎯 Áreas de Oportunidad:</strong>
+                                    <ul style="margin: 6px 0; padding-left: 18px; font-size: 12px; line-height: 1.4;">
+                                        ${areasHtml}
+                                    </ul>
+                                </div>
+                            </div>
+                        `);
+                    });
+                    
+                    // Remove loading message after 2 seconds
+                    setTimeout(() => {
+                        loadingDiv.remove();
+                    }, 2000);
+                    
+                } else {
+                    loadingDiv.textContent = 'Error cargando sucursales';
+                    loadingDiv.className += ' bg-red-100 text-red-700';
+                }
+            } catch (error) {
+                console.error('Error loading sucursales:', error);
+                loadingDiv.textContent = 'Error de conexión';
+                loadingDiv.className += ' bg-red-100 text-red-700';
+            }
+            
+            window.pinMap = pinMap;
+        }
+        
+        // Helper functions
+        function getStateScore(stateName) {
+            const stateScores = {
+                'Nuevo León': 87.4,
+                'Tamaulipas': 82.1,
+                'Coahuila': 85.3,
+                'Querétaro': 91.2,
+                'Michoacán': 89.8,
+                'Durango': 84.7,
+                'Sinaloa': 86.5
+            };
+            return stateScores[stateName] || 75;
+        }
+        
+        function getHeatMapColor(score) {
+            if (score >= 90) return '#059669'; // Excelente
+            if (score >= 80) return '#10b981'; // Bueno
+            if (score >= 70) return '#f59e0b'; // Alerta
+            return '#dc2626'; // Crítico (<70%)
+        }
+        
+        function getMarkerColor(score) {
+            if (score >= 90) return '#10b981'; // Verde
+            if (score >= 80) return '#3b82f6'; // Azul
+            if (score >= 70) return '#f59e0b'; // Amarillo
+            return '#dc2626'; // Rojo
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            showDashboard('calificacion');
+            initializeMaps();
+        });
+    </script>
+</body>
+</html>

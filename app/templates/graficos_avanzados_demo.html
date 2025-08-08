@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Demo Avanzada de Gráficos - Supervisión Operativa</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Todas las librerías de gráficos -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/treemap.js"></script>
+    <script src="https://code.highcharts.com/modules/sunburst.js"></script>
+    <script src="https://code.highcharts.com/modules/sankey.js"></script>
+    <script src="https://code.highcharts.com/modules/pattern-fill.js"></script>
+    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+    
+    <!-- Mapbox para mapas avanzados -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    
+    <!-- Leaflet para mapas alternativos -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- GeoJSON para mapas -->
+    <script src="{{ url_for('static', filename='js/mexico-angel-geojson.js') }}"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f4f8;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header mejorado */
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(33, 150, 243, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            opacity: 0.95;
+            font-size: 18px;
+        }
+        
+        /* Navegación por categorías */
+        .category-nav {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+        
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px;
+        }
+        
+        .category-tab {
+            padding: 10px 20px;
+            background: #f7fafc;
+            border: 2px solid transparent;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-tab:hover {
+            background: #e2e8f0;
+        }
+        
+        .category-tab.active {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+        
+        /* Controles avanzados */
+        .controls-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .controls-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        .control-group select,
+        .control-group input {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .control-group select:focus,
+        .control-group input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+        
+        /* Controles adicionales */
+        .advanced-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .control-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: #f7fafc;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .control-chip:hover {
+            background: #e2e8f0;
+        }
+        
+        .control-chip.active {
+            background: #2196F3;
+            color: white;
+        }
+        
+        /* Secciones de gráficos */
+        .chart-section {
+            display: none;
+        }
+        
+        .chart-section.active {
+            display: block;
+        }
+        
+        .section-header {
+            margin: 30px 0 20px;
+            padding: 15px 0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-subtitle {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        /* Grid de gráficos mejorado */
+        .charts-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .charts-grid.single {
+            grid-template-columns: 1fr;
+        }
+        
+        .charts-grid.double {
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        }
+        
+        .charts-grid.triple {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .chart-info {
+            flex: 1;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .chart-description {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .chart-badge {
+            padding: 4px 10px;
+            background: #f7fafc;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .chart-badge.new {
+            background: #10b981;
+            color: white;
+        }
+        
+        .chart-badge.recommended {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .chart-rating {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .star {
+            cursor: pointer;
+            font-size: 18px;
+            color: #e2e8f0;
+            transition: color 0.2s;
+        }
+        
+        .star:hover,
+        .star.active {
+            color: #fbbf24;
+        }
+        
+        .chart-container {
+            position: relative;
+            min-height: 300px;
+        }
+        
+        .chart-container.small {
+            min-height: 200px;
+        }
+        
+        .chart-container.large {
+            min-height: 400px;
+        }
+        
+        .chart-container.extra-large {
+            min-height: 500px;
+        }
+        
+        /* Loading state */
+        .chart-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Comparación side-by-side */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        /* Panel de estadísticas */
+        .stats-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2196F3;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        /* Footer con resumen */
+        .summary-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .summary-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .summary-card {
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .summary-card-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+        
+        .summary-content {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-grid.double,
+            .charts-grid.triple {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .category-nav {
+                position: static;
+            }
+        }
+        
+        /* Animaciones */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Tooltips personalizados */
+        .custom-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header principal -->
+        <div class="header">
+            <h1>🚀 Demo Avanzada de Gráficos - Supervisión Operativa</h1>
+            <p>Explora más de 30 tipos de visualizaciones con datos reales en tiempo real</p>
+        </div>
+        
+        <!-- Navegación por categorías -->
+        <div class="category-nav">
+            <div class="category-tabs">
+                <div class="category-tab active" onclick="showCategory('maps')">
+                    🗺️ Mapas Avanzados
+                </div>
+                <div class="category-tab" onclick="showCategory('bars')">
+                    📊 Barras y Columnas
+                </div>
+                <div class="category-tab" onclick="showCategory('trends')">
+                    📈 Tendencias y Series
+                </div>
+                <div class="category-tab" onclick="showCategory('comparison')">
+                    🔄 Comparación
+                </div>
+                <div class="category-tab" onclick="showCategory('distribution')">
+                    🎯 Distribución
+                </div>
+                <div class="category-tab" onclick="showCategory('gauges')">
+                    🎛️ Indicadores
+                </div>
+                <div class="category-tab" onclick="showCategory('advanced')">
+                    ⚡ Avanzados
+                </div>
+            </div>
+        </div>
+        
+        <!-- Panel de estadísticas -->
+        <div class="stats-panel">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-sucursales">-</div>
+                    <div class="stat-label">Sucursales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-evaluaciones">-</div>
+                    <div class="stat-label">Evaluaciones</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="promedio-general">-</div>
+                    <div class="stat-label">Promedio General</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-areas">-</div>
+                    <div class="stat-label">Áreas Evaluadas</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controles principales -->
+        <div class="controls-section">
+            <div class="controls-title">🎛️ Controles Avanzados</div>
+            
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>📅 Trimestre:</label>
+                    <select id="quarter-filter">
+                        <option value="ALL">Todos los trimestres</option>
+                        <option value="Q1">Q1 2025</option>
+                        <option value="Q2">Q2 2025</option>
+                        <option value="Q3">Q3 2025</option>
+                        <option value="Q4">Q4 2025</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>📍 Estado:</label>
+                    <select id="estado-filter">
+                        <option value="">Todos los estados</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>🏢 Grupo Operativo:</label>
+                    <select id="grupo-filter">
+                        <option value="">Todos los grupos</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>📊 Top N:</label>
+                    <select id="top-n-filter">
+                        <option value="5">Top 5</option>
+                        <option value="10" selected>Top 10</option>
+                        <option value="15">Top 15</option>
+                        <option value="20">Top 20</option>
+                        <option value="all">Todos</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>🎨 Tema de Color:</label>
+                    <select id="color-theme">
+                        <option value="default">Default</option>
+                        <option value="blue">Azul</option>
+                        <option value="green">Verde</option>
+                        <option value="purple">Morado</option>
+                        <option value="orange">Naranja</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>🔄 Animación:</label>
+                    <select id="animation-speed">
+                        <option value="0">Sin animación</option>
+                        <option value="500">Rápida</option>
+                        <option value="1000" selected>Normal</option>
+                        <option value="2000">Lenta</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="advanced-controls">
+                <div class="control-chip" onclick="toggleControl('3d')">
+                    <input type="checkbox" id="enable-3d"> 3D
+                </div>
+                <div class="control-chip" onclick="toggleControl('labels')">
+                    <input type="checkbox" id="show-labels" checked> Etiquetas
+                </div>
+                <div class="control-chip" onclick="toggleControl('grid')">
+                    <input type="checkbox" id="show-grid" checked> Cuadrícula
+                </div>
+                <div class="control-chip" onclick="toggleControl('legend')">
+                    <input type="checkbox" id="show-legend" checked> Leyenda
+                </div>
+                <div class="control-chip" onclick="toggleControl('responsive')">
+                    <input type="checkbox" id="responsive" checked> Responsive
+                </div>
+                <div class="control-chip" onclick="toggleControl('dark')">
+                    <input type="checkbox" id="dark-mode"> Modo Oscuro
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 1: MAPAS AVANZADOS -->
+        <div class="chart-section active" id="maps-section">
+            <div class="section-header">
+                <h2 class="section-title">🗺️ Mapas Avanzados</h2>
+                <p class="section-subtitle">Diferentes tipos de mapas interactivos con datos reales</p>
+            </div>
+            
+            <div class="charts-grid single">
+                <!-- Mapa 1: Choropleth México con zoom -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🇲🇽 Mapa Choropleth Interactivo</h3>
+                            <p class="chart-description">Mapa de México con zoom, pan y hover detallado</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge recommended">Recomendado</span>
+                            <div class="chart-rating" data-chart="choropleth-zoom">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container large" id="choropleth-zoom"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid double">
+                <!-- Mapa 2: Pin Map con clusters -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📍 Pin Map con Clusters</h3>
+                            <p class="chart-description">Ubicaciones exactas de sucursales con agrupación</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="pin-map-clusters">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="pin-map-clusters"></div>
+                </div>
+                
+                <!-- Mapa 3: Bubble Map por performance -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🫧 Bubble Map Performance</h3>
+                            <p class="chart-description">Tamaño = evaluaciones, Color = performance</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="bubble-map">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="bubble-map"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid triple">
+                <!-- Mapa 4: Heat Map de densidad -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🔥 Heat Map Densidad</h3>
+                            <p class="chart-description">Concentración de sucursales</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="density-map">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="density-map"></div>
+                </div>
+                
+                <!-- Mapa 5: Mapa 3D extruido -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🏔️ Mapa 3D Extruido</h3>
+                            <p class="chart-description">Altura = performance promedio</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="3d-map">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="3d-map"></div>
+                </div>
+                
+                <!-- Mapa 6: Mapa de flujo -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">➡️ Mapa de Flujo</h3>
+                            <p class="chart-description">Conexiones entre sucursales</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="flow-map">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="flow-map"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 2: BARRAS Y COLUMNAS -->
+        <div class="chart-section" id="bars-section">
+            <div class="section-header">
+                <h2 class="section-title">📊 Gráficos de Barras y Columnas</h2>
+                <p class="section-subtitle">Múltiples variaciones de gráficos de barras para diferentes casos de uso</p>
+            </div>
+            
+            <div class="charts-grid double">
+                <!-- Bar 1: Barras horizontales clásicas -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📊 Barras Horizontales Clásicas</h3>
+                            <p class="chart-description">Top sucursales con gradiente de color</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge recommended">Recomendado</span>
+                            <div class="chart-rating" data-chart="horizontal-bars">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="horizontal-bars"></div>
+                </div>
+                
+                <!-- Bar 2: Columnas agrupadas -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📊 Columnas Agrupadas</h3>
+                            <p class="chart-description">Comparación por trimestre</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="grouped-columns">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="grouped-columns"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid triple">
+                <!-- Bar 3: Barras apiladas -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📊 Barras Apiladas</h3>
+                            <p class="chart-description">Composición por áreas</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="stacked-bars">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="stacked-bars"></div>
+                </div>
+                
+                <!-- Bar 4: Barras con línea de tendencia -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📊 Barras + Línea</h3>
+                            <p class="chart-description">Valores y tendencia</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="bars-with-line">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="bars-with-line"></div>
+                </div>
+                
+                <!-- Bar 5: Barras bipolares -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">↔️ Barras Bipolares</h3>
+                            <p class="chart-description">Positivo vs Negativo</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="bipolar-bars">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="bipolar-bars"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid single">
+                <!-- Bar 6: Waterfall chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🌊 Gráfico Waterfall</h3>
+                            <p class="chart-description">Análisis de contribución al promedio general</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="waterfall-chart">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="waterfall-chart"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 3: TENDENCIAS Y SERIES TEMPORALES -->
+        <div class="chart-section" id="trends-section">
+            <div class="section-header">
+                <h2 class="section-title">📈 Tendencias y Series Temporales</h2>
+                <p class="section-subtitle">Visualización de cambios a lo largo del tiempo</p>
+            </div>
+            
+            <div class="charts-grid single">
+                <!-- Trend 1: Líneas múltiples con predicción -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📈 Tendencias con Predicción</h3>
+                            <p class="chart-description">Histórico + proyección futura basada en tendencias</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge recommended">Recomendado</span>
+                            <div class="chart-rating" data-chart="trends-prediction">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container large" id="trends-prediction"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid double">
+                <!-- Trend 2: Área con zoom -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📊 Gráfico de Área con Zoom</h3>
+                            <p class="chart-description">Selecciona un rango para hacer zoom</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="area-zoom">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="area-zoom"></div>
+                </div>
+                
+                <!-- Trend 3: Candlestick -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🕯️ Gráfico Candlestick</h3>
+                            <p class="chart-description">Min, Max, Apertura, Cierre por período</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="candlestick">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="candlestick"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid triple">
+                <!-- Trend 4: Sparklines -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">✨ Sparklines Dashboard</h3>
+                            <p class="chart-description">Mini gráficos de tendencia</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="sparklines">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="sparklines"></div>
+                </div>
+                
+                <!-- Trend 5: Stream graph -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🌊 Stream Graph</h3>
+                            <p class="chart-description">Flujo de áreas en el tiempo</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="stream-graph">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="stream-graph"></div>
+                </div>
+                
+                <!-- Trend 6: Timeline -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📅 Timeline Interactivo</h3>
+                            <p class="chart-description">Eventos importantes</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="timeline">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="timeline"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 4: COMPARACIÓN -->
+        <div class="chart-section" id="comparison-section">
+            <div class="section-header">
+                <h2 class="section-title">🔄 Gráficos de Comparación</h2>
+                <p class="section-subtitle">Compara múltiples dimensiones simultáneamente</p>
+            </div>
+            
+            <div class="comparison-container">
+                <div class="comparison-header">
+                    <h4>Comparación Side-by-Side: Q1 vs Q2 2025</h4>
+                </div>
+                
+                <!-- Comparison 1: Radar doble -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🕸️ Radar Q1</h3>
+                            <p class="chart-description">Performance por área</p>
+                        </div>
+                    </div>
+                    <div class="chart-container small" id="radar-q1"></div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🕸️ Radar Q2</h3>
+                            <p class="chart-description">Performance por área</p>
+                        </div>
+                    </div>
+                    <div class="chart-container small" id="radar-q2"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid double">
+                <!-- Comparison 2: Parallel coordinates -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🎻 Coordenadas Paralelas</h3>
+                            <p class="chart-description">Múltiples dimensiones de análisis</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="parallel-coords">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="parallel-coords"></div>
+                </div>
+                
+                <!-- Comparison 3: Bullet chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🎯 Bullet Charts</h3>
+                            <p class="chart-description">Performance vs Meta vs Rango</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="bullet-charts">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="bullet-charts"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 5: DISTRIBUCIÓN -->
+        <div class="chart-section" id="distribution-section">
+            <div class="section-header">
+                <h2 class="section-title">🎯 Gráficos de Distribución</h2>
+                <p class="section-subtitle">Visualiza cómo se distribuyen tus datos</p>
+            </div>
+            
+            <div class="charts-grid triple">
+                <!-- Distribution 1: Donut avanzado -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🍩 Donut Multinivel</h3>
+                            <p class="chart-description">Grupos y subgrupos</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge recommended">Recomendado</span>
+                            <div class="chart-rating" data-chart="multilevel-donut">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="multilevel-donut"></div>
+                </div>
+                
+                <!-- Distribution 2: Box plot -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📦 Box Plot</h3>
+                            <p class="chart-description">Distribución estadística</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="box-plot">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="box-plot"></div>
+                </div>
+                
+                <!-- Distribution 3: Violin plot -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🎻 Violin Plot</h3>
+                            <p class="chart-description">Densidad de distribución</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="violin-plot">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="violin-plot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 6: INDICADORES Y GAUGES -->
+        <div class="chart-section" id="gauges-section">
+            <div class="section-header">
+                <h2 class="section-title">🎛️ Indicadores y Gauges</h2>
+                <p class="section-subtitle">KPIs visuales e indicadores de performance</p>
+            </div>
+            
+            <div class="charts-grid triple">
+                <!-- Gauge 1: Velocímetro clásico -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🎯 Velocímetro Clásico</h3>
+                            <p class="chart-description">Indicador principal</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="classic-gauge">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container small" id="classic-gauge"></div>
+                </div>
+                
+                <!-- Gauge 2: Gauge moderno -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🎨 Gauge Moderno</h3>
+                            <p class="chart-description">Estilo minimalista</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge recommended">Recomendado</span>
+                            <div class="chart-rating" data-chart="modern-gauge">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container small" id="modern-gauge"></div>
+                </div>
+                
+                <!-- Gauge 3: Progress bars -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">📊 Progress Bars</h3>
+                            <p class="chart-description">Múltiples indicadores</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="progress-bars">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container small" id="progress-bars"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN 7: GRÁFICOS AVANZADOS -->
+        <div class="chart-section" id="advanced-section">
+            <div class="section-header">
+                <h2 class="section-title">⚡ Gráficos Avanzados</h2>
+                <p class="section-subtitle">Visualizaciones complejas para análisis profundo</p>
+            </div>
+            
+            <div class="charts-grid single">
+                <!-- Advanced 1: Sunburst -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">☀️ Sunburst Jerárquico</h3>
+                            <p class="chart-description">Navegación por niveles de jerarquía</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="sunburst">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container large" id="sunburst"></div>
+                </div>
+            </div>
+            
+            <div class="charts-grid double">
+                <!-- Advanced 2: Network graph -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🕸️ Gráfico de Red</h3>
+                            <p class="chart-description">Conexiones entre sucursales</p>
+                        </div>
+                        <div class="chart-actions">
+                            <div class="chart-rating" data-chart="network-graph">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="network-graph"></div>
+                </div>
+                
+                <!-- Advanced 3: Scatter 3D -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-info">
+                            <h3 class="chart-title">🎲 Scatter 3D</h3>
+                            <p class="chart-description">Análisis tridimensional</p>
+                        </div>
+                        <div class="chart-actions">
+                            <span class="chart-badge new">Nuevo</span>
+                            <div class="chart-rating" data-chart="scatter-3d">
+                                <span class="star" data-rating="1">⭐</span>
+                                <span class="star" data-rating="2">⭐</span>
+                                <span class="star" data-rating="3">⭐</span>
+                                <span class="star" data-rating="4">⭐</span>
+                                <span class="star" data-rating="5">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="scatter-3d"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resumen y selección final -->
+        <div class="summary-section">
+            <h3 class="summary-title">📊 Resumen de Evaluación</h3>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h4 class="summary-card-title">⭐ Top 5 Mejor Calificados</h4>
+                    <div class="summary-content" id="top-rated-charts">
+                        Evalúa los gráficos para ver los mejores aquí
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <h4 class="summary-card-title">📱 Mejor para Móvil</h4>
+                    <div class="summary-content" id="mobile-friendly-charts">
+                        • Barras horizontales simples<br>
+                        • Donut charts<br>
+                        • Gauge modernos<br>
+                        • Sparklines
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <h4 class="summary-card-title">⚡ Mejor Performance</h4>
+                    <div class="summary-content" id="performance-charts">
+                        • ApexCharts básicos<br>
+                        • Chart.js simples<br>
+                        • Tablas HTML<br>
+                        • Progress bars CSS
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <h4 class="summary-card-title">🎯 Recomendación Final</h4>
+                    <div class="summary-content" id="final-recommendation">
+                        Para la Mini Web App, recomendamos:<br>
+                        1. Mapa choropleth simple<br>
+                        2. Barras horizontales<br>
+                        3. Líneas de tendencia<br>
+                        4. Gauge moderno
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading overlay -->
+    <div id="loading-overlay" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+        font-size: 18px;
+        flex-direction: column;
+        gap: 20px;
+    ">
+        <div style="
+            width: 50px;
+            height: 50px;
+            border: 3px solid #333;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        "></div>
+        <div>Cargando gráficos avanzados...</div>
+    </div>
+    
+    <!-- Tooltip personalizado -->
+    <div class="custom-tooltip" id="custom-tooltip"></div>
+    
+    <!-- Add spinner animation -->
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <script src="{{ url_for('static', filename='js/graficos_ultrabasico.js') }}"></script>
+</body>
+</html>

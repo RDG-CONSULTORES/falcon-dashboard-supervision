@@ -1,0 +1,36 @@
+# Production Requirements - Falcon Miniapp Bot v4.0
+# Security, Performance, and Production-Ready Dependencies
+
+# Core Framework
+Flask==3.0.0
+Flask-CORS==4.0.0
+python-dotenv==1.0.0
+
+# Security & Authentication
+PyJWT==2.8.0
+marshmallow==3.20.1
+Flask-Limiter==3.5.0
+Flask-Talisman==1.1.0
+bcrypt==4.0.1
+
+# Database & Caching
+psycopg[binary]==3.2.9
+psycopg-pool==3.2.2
+redis==5.0.1
+
+# Telegram Bot
+python-telegram-bot==20.3
+
+# Performance & Monitoring
+psutil==5.9.6
+
+# Background Tasks (Optional - for production)
+celery==5.3.4
+
+# Development & Testing (Optional)
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+
+# Utilities
+requests==2.31.0

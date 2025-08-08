@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Supervision Operativa - FUNCIONANDO</title>
+    
+    <!-- Leaflet para mapas -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    
+    <style>
+        :root {
+            --metabase-blue: #509EE3;
+            --metabase-purple: #A663CC;
+            --metabase-bg: #F9FBFC;
+            --metabase-card: #FFFFFF;
+            --metabase-border: #E4E8EC;
+            --metabase-text: #2E3138;
+            --metabase-secondary: #7C8B8F;
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--metabase-bg);
+            color: var(--metabase-text);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .filters-row {
+            background: var(--metabase-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 8px 16px;
+            border: 1px solid var(--metabase-border);
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .kpis-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .kpi-card {
+            background: var(--metabase-card);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+        }
+        
+        .kpi-title {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .kpi-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--metabase-text);
+            margin-bottom: 10px;
+        }
+        
+        .kpi-period {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            margin-bottom: 15px;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .card {
+            background: var(--metabase-card);
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+        }
+        
+        .card-header {
+            padding: 20px 25px 15px 25px;
+            border-bottom: 1px solid var(--metabase-border);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .card-content {
+            padding: 20px 25px;
+        }
+        
+        .map-container, .chart-container {
+            height: 400px;
+            width: 100%;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Supervision Operativa Dashboard</h1>
+        <div style="font-size: 12px; color: var(--metabase-secondary);">
+            <div id="lastUpdate">Última actualización: Cargando...</div>
+        </div>
+    </div>
+    
+    <div id="connectionStatus" class="status info">🔄 Verificando conexión...</div>
+    
+    <!-- Filtros -->
+    <div class="filters-row">
+        <div>
+            <label>Trimestre:</label>
+            <select class="filter-select" id="trimestreFilter">
+                <option value="Q1">Q1 2025</option>
+                <option value="Q2" selected>Q2 2025</option>
+                <option value="Q3">Q3 2025</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Estado:</label>
+            <select class="filter-select" id="estadoFilter">
+                <option value="">Todos los Estados</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Grupo:</label>
+            <select class="filter-select" id="grupoFilter">
+                <option value="">Todos los Grupos</option>
+            </select>
+        </div>
+        
+        <button onclick="updateDashboard()" style="padding: 8px 16px; background: var(--metabase-blue); color: white; border: none; border-radius: 4px; cursor: pointer;">
+            🔄 Actualizar
+        </button>
+    </div>
+    
+    <!-- KPIs -->
+    <div class="kpis-row">
+        <div class="kpi-card">
+            <div class="kpi-title" id="kpiTitle">Promedio General</div>
+            <div class="kpi-value" id="kpiPromedio">86.2%</div>
+            <div class="kpi-period" id="kpiPeriod">Q2 2025</div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-title">Sucursales Evaluadas</div>
+            <div class="kpi-value" id="kpiSucursales">88</div>
+            <div class="kpi-period" id="kpiPeriod2">Q2 2025</div>
+        </div>
+    </div>
+    
+    <!-- Mapas y Gráficas -->
+    <div class="main-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🗺️ Mapa de Sucursales</h3>
+            </div>
+            <div class="card-content">
+                <div id="pinMap" class="map-container"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">📊 Performance por Estado</h3>
+            </div>
+            <div class="card-content">
+                <div id="estadoChart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración
+        const API_BASE = 'http://localhost:5002';
+        let currentFilters = {
+            trimestre: 'Q2',
+            estado: '',
+            grupo: ''
+        };
+        
+        let pinMap;
+        let pinLayer;
+        
+        // Inicializar mapa
+        function initializeMap() {
+            if (!pinMap) {
+                pinMap = L.map('pinMap', {
+                    center: [23.6345, -102.5528],
+                    zoom: 5
+                });
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(pinMap);
+            }
+        }
+        
+        // Actualizar estado de conexión
+        function updateConnectionStatus(message, type = 'info') {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        // Cargar KPIs
+        async function loadKPIs() {
+            try {
+                const params = new URLSearchParams({
+                    year: 2025,
+                    quarter: currentFilters.trimestre
+                });
+                
+                if (currentFilters.estado) params.append('estado', currentFilters.estado);
+                if (currentFilters.grupo) params.append('grupo', currentFilters.grupo);
+                
+                const url = `${API_BASE}/api/kpis?${params}`;
+                console.log('📡 Fetching KPIs:', url);
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                console.log('📊 KPI Data:', data);
+                
+                // Actualizar KPIs
+                document.getElementById('kpiPromedio').textContent = parseFloat(data.promedio || 0).toFixed(1) + '%';
+                document.getElementById('kpiSucursales').textContent = data.sucursales || '0';
+                
+                // Actualizar títulos
+                let titulo = 'Promedio General';
+                if (currentFilters.estado && currentFilters.grupo) {
+                    titulo = `Promedio (${currentFilters.grupo} - ${currentFilters.estado})`;
+                } else if (currentFilters.grupo) {
+                    titulo = `Promedio (${currentFilters.grupo})`;
+                } else if (currentFilters.estado) {
+                    titulo = `Promedio (${currentFilters.estado})`;
+                }
+                document.getElementById('kpiTitle').textContent = titulo;
+                
+                // Actualizar períodos
+                const period = `${currentFilters.trimestre} 2025`;
+                document.getElementById('kpiPeriod').textContent = period;
+                document.getElementById('kpiPeriod2').textContent = period;
+                
+                return data;
+                
+            } catch (error) {
+                console.error('❌ Error loading KPIs:', error);
+                document.getElementById('kpiPromedio').textContent = 'Error';
+                document.getElementById('kpiSucursales').textContent = 'Error';
+                throw error;
+            }
+        }
+        
+        // Cargar coordenadas para mapa
+        async function loadCoordinates() {
+            try {
+                const params = new URLSearchParams({
+                    year: 2025,
+                    quarter: currentFilters.trimestre,
+                    limit: 500
+                });
+                
+                if (currentFilters.estado) params.append('estado', currentFilters.estado);
+                
+                const url = `${API_BASE}/api/coordinates?${params}`;
+                console.log('📡 Fetching coordinates:', url);
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                console.log('🗺️ Coordinates data:', data.length, 'sucursales');
+                
+                // Limpiar mapa
+                if (pinLayer) {
+                    pinMap.removeLayer(pinLayer);
+                }
+                pinLayer = L.layerGroup().addTo(pinMap);
+                
+                let markersAdded = 0;
+                
+                // Agregar marcadores
+                data.forEach((sucursal, index) => {
+                    if (sucursal.latitud && sucursal.longitud) {
+                        const lat = parseFloat(sucursal.latitud);
+                        const lng = parseFloat(sucursal.longitud);
+                        const score = parseFloat(sucursal.promedio_porcentaje) || 0;
+                        
+                        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                            // Crear marcador simple
+                            const marker = L.circleMarker([lat, lng], {
+                                radius: 8,
+                                fillColor: score >= 90 ? '#28a745' : score >= 80 ? '#ffc107' : '#dc3545',
+                                color: '#fff',
+                                weight: 2,
+                                opacity: 1,
+                                fillOpacity: 0.8
+                            });
+                            
+                            // Popup con información
+                            const popupContent = `
+                                <div>
+                                    <h4>${sucursal.sucursal_clean}</h4>
+                                    <p>📍 ${sucursal.municipio}, ${sucursal.estado}</p>
+                                    <p>📊 ${sucursal.total_supervisiones} evaluaciones</p>
+                                    <p>📅 ${currentFilters.trimestre} 2025</p>
+                                    <p><strong>🎯 Calificación: ${score.toFixed(1)}%</strong></p>
+                                </div>
+                            `;
+                            
+                            marker.bindPopup(popupContent).addTo(pinLayer);
+                            markersAdded++;
+                        }
+                    }
+                });
+                
+                console.log(`✅ Added ${markersAdded} markers to map`);
+                return data;
+                
+            } catch (error) {
+                console.error('❌ Error loading coordinates:', error);
+                throw error;
+            }
+        }
+        
+        // Crear gráfica de estados
+        async function createChart() {
+            try {
+                const params = new URLSearchParams({
+                    year: 2025,
+                    quarter: currentFilters.trimestre
+                });
+                
+                if (currentFilters.estado) params.append('estado', currentFilters.estado);
+                if (currentFilters.grupo) params.append('grupo', currentFilters.grupo);
+                
+                const url = `${API_BASE}/api/v1/analytics/performance/states?${params}`;
+                console.log('📡 Fetching chart data:', url);
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const result = await response.json();
+                console.log('📊 Chart data:', result);
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    const options = {
+                        series: [{
+                            name: 'Performance',
+                            data: result.data.map(item => ({
+                                x: item.estado,
+                                y: parseFloat(item.promedio)
+                            }))
+                        }],
+                        chart: {
+                            type: 'bar',
+                            height: 350
+                        },
+                        colors: [var(--metabase-purple)],
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 4,
+                                horizontal: false
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function(val) {
+                                return val.toFixed(1) + '%';
+                            }
+                        },
+                        yaxis: {
+                            title: { text: 'Performance (%)' },
+                            min: 60,
+                            max: 100
+                        }
+                    };
+                    
+                    const chart = new ApexCharts(document.querySelector("#estadoChart"), options);
+                    chart.render();
+                } else {
+                    document.getElementById('estadoChart').innerHTML = '<p>No hay datos para mostrar</p>';
+                }
+                
+            } catch (error) {
+                console.error('❌ Error creating chart:', error);
+                document.getElementById('estadoChart').innerHTML = '<p>Error cargando gráfica</p>';
+            }
+        }
+        
+        // Cargar filtros
+        async function loadFilters() {
+            try {
+                // Cargar estados
+                const estadosResponse = await fetch(`${API_BASE}/api/v1/analytics/metadata/estados`);
+                if (estadosResponse.ok) {
+                    const estadosData = await estadosResponse.json();
+                    if (estadosData.success) {
+                        const estadoSelect = document.getElementById('estadoFilter');
+                        estadosData.data.forEach(estado => {
+                            const option = document.createElement('option');
+                            option.value = estado;
+                            option.textContent = estado;
+                            estadoSelect.appendChild(option);
+                        });
+                    }
+                }
+                
+                // Cargar grupos
+                const gruposResponse = await fetch(`${API_BASE}/api/v1/analytics/metadata/grupos`);
+                if (gruposResponse.ok) {
+                    const gruposData = await gruposResponse.json();
+                    if (gruposData.success) {
+                        const grupoSelect = document.getElementById('grupoFilter');
+                        gruposData.data.forEach(grupo => {
+                            if (grupo && grupo.trim() && grupo !== 'NO_ENCONTRADO') {
+                                const option = document.createElement('option');
+                                option.value = grupo;
+                                option.textContent = grupo;
+                                grupoSelect.appendChild(option);
+                            }
+                        });
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error loading filters:', error);
+            }
+        }
+        
+        // Actualizar dashboard completo
+        async function updateDashboard() {
+            try {
+                updateConnectionStatus('🔄 Actualizando dashboard...', 'info');
+                
+                // Obtener valores de filtros
+                currentFilters.trimestre = document.getElementById('trimestreFilter').value;
+                currentFilters.estado = document.getElementById('estadoFilter').value;
+                currentFilters.grupo = document.getElementById('grupoFilter').value;
+                
+                console.log('🔄 Updating with filters:', currentFilters);
+                
+                // Cargar todos los datos
+                await loadKPIs();
+                await loadCoordinates();
+                await createChart();
+                
+                updateConnectionStatus(`✅ Dashboard actualizado (${currentFilters.trimestre} ${currentFilters.estado || 'Todos'})`, 'success');
+                document.getElementById('lastUpdate').textContent = `Última actualización: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('❌ Dashboard update failed:', error);
+                updateConnectionStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Event listeners
+        function setupEventListeners() {
+            document.getElementById('trimestreFilter').addEventListener('change', updateDashboard);
+            document.getElementById('estadoFilter').addEventListener('change', updateDashboard);
+            document.getElementById('grupoFilter').addEventListener('change', updateDashboard);
+        }
+        
+        // Inicialización
+        async function initialize() {
+            console.log('🚀 Initializing dashboard...');
+            
+            initializeMap();
+            setupEventListeners();
+            await loadFilters();
+            await updateDashboard();
+            
+            console.log('✅ Dashboard initialized successfully');
+        }
+        
+        // Iniciar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

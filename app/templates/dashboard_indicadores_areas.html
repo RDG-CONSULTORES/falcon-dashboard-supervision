@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INDICADORES X AREA - Metabase Style</title>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    
+    <style>
+        :root {
+            --metabase-blue: #509EE3;
+            --metabase-purple: #A663CC;
+            --metabase-red: #E74C3C;
+            --metabase-orange: #F39C12;
+            --metabase-green: #27AE60;
+            --metabase-yellow: #F1C40F;
+            --metabase-bg: #F9FBFC;
+            --metabase-card: #FFFFFF;
+            --metabase-border: #E4E8EC;
+            --metabase-text: #2E3138;
+            --metabase-secondary: #7C8B8F;
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--metabase-bg);
+            color: var(--metabase-text);
+            line-height: 1.5;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--metabase-text);
+            margin: 0;
+        }
+        
+        .metabase-logo {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filters-row {
+            background: var(--metabase-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-icon {
+            width: 16px;
+            height: 16px;
+            background: var(--metabase-secondary);
+            border-radius: 2px;
+        }
+        
+        .filter-select {
+            padding: 8px 16px;
+            border: 1px solid var(--metabase-border);
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            color: var(--metabase-text);
+            min-width: 150px;
+            cursor: pointer;
+        }
+        
+        /* Grids */
+        .trends-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+        }
+        
+        .card {
+            background: var(--metabase-card);
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 20px 25px 15px 25px;
+            border-bottom: 1px solid var(--metabase-border);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: var(--metabase-text);
+        }
+        
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--metabase-secondary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .card-content {
+            padding: 20px 25px;
+        }
+        
+        .chart-container {
+            height: 250px;
+            width: 100%;
+        }
+        
+        .chart-container-medium {
+            height: 350px;
+            width: 100%;
+        }
+        
+        .chart-container-large {
+            height: 500px;
+            width: 100%;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .trends-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .trends-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>INDICADORES X AREA</h1>
+        <div class="metabase-logo">
+            Hecho con <span style="color: var(--metabase-blue);">■■■■</span> <strong>Metabase</strong>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="filters-row">
+        <div class="filter-group">
+            <div class="filter-icon"></div>
+            <select class="filter-select" id="grupoFilter">
+                <option value="">Grupo</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <div class="filter-icon"></div>
+            <select class="filter-select" id="estadoFilter">
+                <option value="">Estado</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <div class="filter-icon"></div>
+            <select class="filter-select" id="trimestreFilter">
+                <option value="Q3" selected>Trimestre</option>
+                <option value="Q1">Q1 2025</option>
+                <option value="Q2">Q2 2025</option>
+                <option value="Q3">Q3 2025</option>
+                <option value="Q4">Q4 2025</option>
+                <option value="ALL">Todos</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Gráficos de Líneas de Tendencias -->
+    <div class="trends-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Tendencias Críticas</h3>
+                <div class="card-subtitle">
+                    <span><span class="legend-dot" style="background: var(--metabase-blue);"></span> EXTERIOR SUCURSAL</span>
+                    <span><span class="legend-dot" style="background: var(--metabase-red);"></span> FREIDORA DE PAPA</span>
+                    <span><span class="legend-dot" style="background: var(--metabase-purple);"></span> FREIDORAS</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="tendenciasCriticas" class="chart-container"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Casos de Éxito - Replicar</h3>
+                <div class="card-subtitle">
+                    <span><span class="legend-dot" style="background: var(--metabase-blue);"></span> JIO</span>
+                    <span><span class="legend-dot" style="background: var(--metabase-orange);"></span> MAQUINA</span>
+                    <span><span class="legend-dot" style="background: var(--metabase-purple);"></span> PLANCHA Y MESA DE TRABAJO</span>
+                    <span><span class="legend-dot" style="background: var(--metabase-red);"></span> REFRIGERADO</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="casosExito" class="chart-container"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Performance Perfecto - Mantener</h3>
+                <div class="card-subtitle">
+                    <span><span class="legend-dot" style="background: var(--metabase-orange);"></span> LAVADO DE UTENSILIOS</span>
+                    <span><span class="legend-dot" style="background: var(--metabase-green);"></span> TIEMPOS DE SERVICIO</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="performancePerfecto" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráficos de Barras -->
+    <div class="bottom-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Areas Abajo de 80%</h3>
+            </div>
+            <div class="card-content">
+                <div id="areasAbajo80" class="chart-container-medium"></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Promedio x Área de Evaluación</h3>
+            </div>
+            <div class="card-content">
+                <div id="promedioArea" class="chart-container-large"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración
+        const API_BASE = 'https://b28030f54f88.ngrok-free.app';
+        const HEADERS = { 'ngrok-skip-browser-warning': 'true' };
+        
+        let currentFilters = {
+            grupo: '',
+            estado: '',
+            trimestre: 'Q3'
+        };
+        
+        // Cargar datos reales de tendencias desde la API
+        async function loadTrendsData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/areas/trends`, { headers: HEADERS });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const areasData = data.data;
+                    
+                    // Categorizar áreas según performance
+                    const criticas = [];
+                    const exito = [];
+                    const perfecto = [];
+                    
+                    Object.keys(areasData).forEach(area => {
+                        const areaPoints = areasData[area];
+                        if (areaPoints.length > 0) {
+                            const latestScore = areaPoints[areaPoints.length - 1].promedio;
+                            const chartData = areaPoints.map(point => ({
+                                x: point.quarter,
+                                y: point.promedio
+                            }));
+                            
+                            if (latestScore < 80) {
+                                criticas.push({ name: area, data: chartData });
+                            } else if (latestScore >= 100) {
+                                perfecto.push({ name: area, data: chartData });
+                            } else if (latestScore >= 90) {
+                                exito.push({ name: area, data: chartData });
+                            }
+                        }
+                    });
+                    
+                    return {
+                        criticas: criticas.slice(0, 3), // Top 3 críticas
+                        exito: exito.slice(0, 4),       // Top 4 de éxito
+                        perfecto: perfecto.slice(0, 2)  // Top 2 perfectas
+                    };
+                }
+                return { criticas: [], exito: [], perfecto: [] };
+            } catch (error) {
+                console.error('Error loading trends data:', error);
+                return { criticas: [], exito: [], perfecto: [] };
+            }
+        }
+        
+        // Crear gráficos de líneas de tendencias
+        function createTrendChart(containerId, data, colors) {
+            const options = {
+                series: data,
+                chart: {
+                    type: 'line',
+                    height: 230,
+                    toolbar: { show: false },
+                    zoom: { enabled: false }
+                },
+                colors: colors,
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                markers: {
+                    size: 6,
+                    strokeColors: '#fff',
+                    strokeWidth: 2
+                },
+                xaxis: {
+                    categories: ['Q1 2025', 'Q2 2025', 'Q3 2025'],
+                    labels: {
+                        style: { fontSize: '12px' }
+                    }
+                },
+                yaxis: {
+                    title: { text: 'Media de Porcentaje' },
+                    min: 0,
+                    max: 100,
+                    labels: {
+                        formatter: function(val) {
+                            return val.toFixed(0);
+                        }
+                    }
+                },
+                legend: {
+                    show: false
+                },
+                grid: {
+                    strokeDashArray: 3,
+                    borderColor: '#e0e6ed'
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false
+                }
+            };
+            
+            const chart = new ApexCharts(document.querySelector(containerId), options);
+            chart.render();
+        }
+        
+        // Crear gráfico de áreas abajo de 80% con datos reales
+        async function createAreasAbajo80Chart() {
+            try {
+                const response = await fetch(`${API_BASE}/api/areas/below-threshold?threshold=80`, { headers: HEADERS });
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.length > 0) {
+                    const chartData = data.data.slice(0, 5).map(item => ({
+                        x: item.area_evaluacion,
+                        y: parseFloat(item.promedio)
+                    }));
+                    
+                    const options = {
+                        series: [{
+                            name: 'Performance',
+                            data: chartData
+                        }],
+                        chart: {
+                            type: 'bar',
+                            height: 330,
+                            toolbar: { show: false }
+                        },
+                        colors: ['#E74C3C'],  // Rojo Metabase
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 4,
+                                horizontal: false,
+                                columnWidth: '60%'
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function(val) {
+                                return val.toFixed(1);
+                            },
+                            style: {
+                                fontSize: '11px',
+                                fontWeight: 600
+                            }
+                        },
+                        xaxis: {
+                            categories: chartData.map(item => item.x),
+                            labels: {
+                                style: { fontSize: '9px' },
+                                rotate: -45
+                            }
+                        },
+                        yaxis: {
+                            title: { text: 'Media de Porcentaje' },
+                            min: 60,
+                            max: 80,
+                            labels: {
+                                formatter: function(val) {
+                                    return val.toFixed(0);
+                                }
+                            }
+                        },
+                        annotations: {
+                            yaxis: [{
+                                y: 80,
+                                borderColor: '#999',
+                                strokeDashArray: 5,
+                                label: {
+                                    text: 'Meta 80%',
+                                    style: { color: '#666' }
+                                }
+                            }]
+                        },
+                        grid: {
+                            strokeDashArray: 3,
+                            borderColor: '#e0e6ed'
+                        }
+                    };
+                    
+                    const chart = new ApexCharts(document.querySelector("#areasAbajo80"), options);
+                    chart.render();
+                } else {
+                    // Mostrar mensaje si no hay áreas críticas
+                    document.querySelector("#areasAbajo80").innerHTML = 
+                        '<div class="loading">¡Excelente! No hay áreas abajo de 80%</div>';
+                }
+            } catch (error) {
+                console.error('Error creating areas abajo 80 chart:', error);
+            }
+        }
+        
+        // Crear gráfico de promedio por área con datos reales
+        async function createPromedioAreaChart() {
+            try {
+                const response = await fetch(`${API_BASE}/api/areas/ranking`, { headers: HEADERS });
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.data.length > 0) {
+                    const chartData = data.data.map(item => ({
+                        x: item.area_evaluacion,
+                        y: parseFloat(item.promedio)
+                    }));
+                    
+                    const options = {
+                        series: [{
+                            name: 'Performance',
+                            data: chartData
+                        }],
+                        chart: {
+                            type: 'bar',
+                            height: 480,
+                            toolbar: { show: false }
+                        },
+                        colors: ['#A663CC'],  // Púrpura Metabase
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 4,
+                                horizontal: false,
+                                columnWidth: '50%'
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function(val) {
+                                return val.toFixed(1) + '%';
+                            },
+                            style: {
+                                fontSize: '9px',
+                                fontWeight: 600
+                            }
+                        },
+                        xaxis: {
+                            categories: chartData.map(item => item.x),
+                            labels: {
+                                style: { fontSize: '8px' },
+                                rotate: -45
+                            }
+                        },
+                        yaxis: {
+                            title: { text: 'Media de Porcentaje' },
+                            min: 60,
+                            max: 100,
+                            labels: {
+                                formatter: function(val) {
+                                    return val.toFixed(0) + '%';
+                                }
+                            }
+                        },
+                        annotations: {
+                            yaxis: [{
+                                y: 80,
+                                borderColor: '#999',
+                                strokeDashArray: 5,
+                                label: {
+                                    text: 'Meta 80%',
+                                    style: { color: '#666' }
+                                }
+                            }]
+                        },
+                        grid: {
+                            strokeDashArray: 3,
+                            borderColor: '#e0e6ed'
+                        }
+                    };
+                    
+                    const chart = new ApexCharts(document.querySelector("#promedioArea"), options);
+                    chart.render();
+                }
+            } catch (error) {
+                console.error('Error creating promedio area chart:', error);
+            }
+        }
+        
+        // Cargar filtros
+        async function loadFilters() {
+            try {
+                // Cargar estados
+                const estadosResponse = await fetch(`${API_BASE}/api/metadata/estados`, { headers: HEADERS });
+                const estadosData = await estadosResponse.json();
+                
+                if (estadosData.success) {
+                    const estadoSelect = document.getElementById('estadoFilter');
+                    estadosData.data.forEach(estado => {
+                        const option = document.createElement('option');
+                        option.value = estado;
+                        option.textContent = estado;
+                        estadoSelect.appendChild(option);
+                    });
+                }
+                
+                // Cargar grupos
+                const gruposResponse = await fetch(`${API_BASE}/api/metadata/grupos`, { headers: HEADERS });
+                const gruposData = await gruposResponse.json();
+                
+                if (gruposData.success) {
+                    const grupoSelect = document.getElementById('grupoFilter');
+                    gruposData.data.forEach(grupo => {
+                        const option = document.createElement('option');
+                        option.value = grupo;
+                        option.textContent = grupo;
+                        grupoSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading filters:', error);
+            }
+        }
+        
+        // Actualizar dashboard
+        async function updateDashboard() {
+            await createAreasAbajo80Chart();
+            await createPromedioAreaChart();
+        }
+        
+        // Event listeners para filtros
+        function setupFilterListeners() {
+            document.getElementById('grupoFilter').addEventListener('change', function() {
+                currentFilters.grupo = this.value;
+                updateDashboard();
+            });
+            
+            document.getElementById('estadoFilter').addEventListener('change', function() {
+                currentFilters.estado = this.value;
+                updateDashboard();
+            });
+            
+            document.getElementById('trimestreFilter').addEventListener('change', function() {
+                currentFilters.trimestre = this.value;
+                updateDashboard();
+            });
+        }
+        
+        // Inicialización
+        async function initialize() {
+            // Cargar datos reales de tendencias
+            const trendsData = await loadTrendsData();
+            
+            // Crear gráficos de líneas con datos reales
+            createTrendChart('#tendenciasCriticas', trendsData.criticas, ['#509EE3', '#E74C3C', '#A663CC']);
+            createTrendChart('#casosExito', trendsData.exito, ['#509EE3', '#F39C12', '#A663CC', '#E74C3C']);
+            createTrendChart('#performancePerfecto', trendsData.perfecto, ['#F39C12', '#27AE60']);
+            
+            // Cargar filtros y datos reales
+            await loadFilters();
+            await updateDashboard();
+            setupFilterListeners();
+        }
+        
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

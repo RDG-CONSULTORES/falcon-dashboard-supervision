@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Metabase - Embedding</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .status { padding: 15px; margin: 15px 0; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .test-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .btn { display: inline-block; padding: 10px 20px; margin: 10px 5px; 
+               background: #509EE3; color: white; text-decoration: none; 
+               border-radius: 6px; border: none; cursor: pointer; }
+        .btn:hover { background: #3d8bdb; }
+        .btn.secondary { background: #6c757d; }
+        .btn.success { background: #28a745; }
+        .btn.danger { background: #dc3545; }
+        pre { background: #f1f1f1; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .iframe-test { width: 100%; height: 400px; border: 2px solid #dee2e6; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diagnóstico Metabase - Embedding</h1>
+        
+        <div class="status warning">
+            <h3>⚠️ Problema Identificado</h3>
+            <p><strong>"rdg-consultores.metabaseapp.com refused to connect"</strong></p>
+            <p>Este error indica que Metabase está bloqueando el embedding del dashboard en iframes.</p>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 URL de tu Dashboard:</h3>
+            <p><strong>URL:</strong> <code id="metabaseUrl">https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68</code></p>
+            <button class="btn" onclick="testDirectAccess()">🔗 Probar Acceso Directo</button>
+            <button class="btn secondary" onclick="testIframeEmbedding()">📱 Probar Iframe</button>
+            <div id="testResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Test de Iframe (Puede Fallar):</h3>
+            <div id="iframeStatus" class="status info">⏳ Haz clic en "Probar Iframe" para comenzar</div>
+            <iframe id="testFrame" class="iframe-test" style="display: none;"></iframe>
+        </div>
+        
+        <div class="status error">
+            <h3>🚨 Posibles Causas del Error:</h3>
+            <ol>
+                <li><strong>Dashboard No Público:</strong> El dashboard no está configurado como público</li>
+                <li><strong>Embedding Deshabilitado:</strong> Metabase no permite embedding de este dashboard</li>
+                <li><strong>Configuración X-Frame-Options:</strong> Metabase bloquea iframes por seguridad</li>
+                <li><strong>CSP Restrictivo:</strong> Content Security Policy muy estricto</li>
+            </ol>
+        </div>
+        
+        <div class="status success">
+            <h3>✅ Soluciones Disponibles:</h3>
+            <ol>
+                <li><strong>Usar Enlace Directo:</strong> Abrir el dashboard en nueva pestaña</li>
+                <li><strong>Configurar Embedding:</strong> Habilitar embedding en configuración de Metabase</li>
+                <li><strong>API de Metabase:</strong> Usar la API para obtener datos y crear dashboard propio</li>
+                <li><strong>Dashboard JavaScript:</strong> Volver al dashboard con JavaScript que funcionaba</li>
+            </ol>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Pasos para Solucionar en Metabase:</h3>
+            <ol>
+                <li>Abrir Metabase Admin Panel</li>
+                <li>Ir a <strong>Settings > Embedding</strong></li>
+                <li>Habilitar <strong>"Enable embedding"</strong></li>
+                <li>En el dashboard, ir a <strong>Sharing & Embedding</strong></li>
+                <li>Activar <strong>"Enable embedding for this dashboard"</strong></li>
+                <li>Copiar el <strong>embedding URL</strong> o <strong>iframe code</strong></li>
+            </ol>
+        </div>
+        
+        <div class="status info">
+            <h3>📋 Enlaces Útiles:</h3>
+            <ul>
+                <li><a href="https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68" target="_blank" class="btn">🚀 Abrir Dashboard Directamente</a></li>
+                <li><a href="https://rdg-consultores.metabaseapp.com/admin" target="_blank" class="btn secondary">⚙️ Admin Panel Metabase</a></li>
+                <li><a href="/dashboard/simple" class="btn success">🧪 Dashboard JavaScript Funcional</a></li>
+            </ul>
+        </div>
+        
+        <div class="status warning">
+            <h3>💡 Recomendación Inmediata:</h3>
+            <p>Mientras solucionas el embedding de Metabase, puedes usar:</p>
+            <ul>
+                <li><strong>Enlace directo:</strong> Los usuarios abren el dashboard en nueva pestaña</li>
+                <li><strong>Dashboard JavaScript:</strong> El dashboard simple que ya funciona con tus datos</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const METABASE_URL = 'https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68';
+        
+        function testDirectAccess() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '<div class="status info">🔄 Probando acceso directo...</div>';
+            
+            // Open in new tab
+            window.open(METABASE_URL, '_blank');
+            
+            setTimeout(() => {
+                resultsDiv.innerHTML = '<div class="status success">✅ Enlace directo abierto en nueva pestaña. ¿Se cargó correctamente?</div>';
+            }, 1000);
+        }
+        
+        function testIframeEmbedding() {
+            const statusDiv = document.getElementById('iframeStatus');
+            const testFrame = document.getElementById('testFrame');
+            
+            statusDiv.innerHTML = '🔄 Probando iframe embedding...';
+            statusDiv.className = 'status info';
+            
+            testFrame.style.display = 'block';
+            testFrame.src = METABASE_URL;
+            
+            let timeout = setTimeout(() => {
+                statusDiv.innerHTML = '❌ Iframe no cargó - "refused to connect" confirmado';
+                statusDiv.className = 'status error';
+                testFrame.style.display = 'none';
+            }, 10000);
+            
+            testFrame.onload = function() {
+                clearTimeout(timeout);
+                statusDiv.innerHTML = '✅ ¡Iframe cargó exitosamente! El embedding funciona.';
+                statusDiv.className = 'status success';
+            };
+            
+            testFrame.onerror = function() {
+                clearTimeout(timeout);
+                statusDiv.innerHTML = '❌ Error de iframe - Metabase bloquea el embedding';
+                statusDiv.className = 'status error';
+                testFrame.style.display = 'none';
+            };
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Diagnóstico Metabase inicialized');
+            console.log('📊 Testing URL:', METABASE_URL);
+        });
+    </script>
+</body>
+</html>

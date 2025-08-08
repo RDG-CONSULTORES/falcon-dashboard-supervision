@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: dashboard-supervision
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn dashboard_supervision_app:app
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONPATH
+        value: /opt/render/project/src

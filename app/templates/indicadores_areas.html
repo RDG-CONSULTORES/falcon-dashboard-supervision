@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Indicadores por Áreas - Supervisión Operativa</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/metabase_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/apex_charts_styles.css') }}">
+    <style>
+        .areas-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .areas-nav h1 {
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            margin: 0;
+            font-weight: 700;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .nav-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        .areas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .area-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        .area-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .area-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+        }
+        .metric-item {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+        .metric-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .heatmap-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .performance-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .perf-excellent { background: #28a745; }
+        .perf-good { background: #17a2b8; }
+        .perf-average { background: #ffc107; }
+        .perf-poor { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navigation Header -->
+        <div class="areas-nav">
+            <h1>📊 INDICADORES X ÁREA</h1>
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showView('overview')">📈 Resumen</button>
+                <button class="nav-btn" onclick="showView('heatmap')">🔥 HeatMap</button>
+                <button class="nav-btn" onclick="showView('trends')">📈 Tendencias</button>
+                <button class="nav-btn" onclick="goToDashboard()">🏠 Dashboard Principal</button>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="grupo-filter-areas">Grupo:</label>
+                <select id="grupo-filter-areas" class="filter-select">
+                    <option value="">Todos los grupos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="estado-filter-areas">Estado:</label>
+                <select id="estado-filter-areas" class="filter-select">
+                    <option value="">Todos los estados</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="trimestre-filter-areas">Trimestre:</label>
+                <select id="trimestre-filter-areas" class="filter-select">
+                    <option value="ALL" selected>Todos</option>
+                    <option value="Q1">Q1 2025</option>
+                    <option value="Q2">Q2 2025</option>
+                    <option value="Q3">Q3 2025</option>
+                    <option value="Q4">Q4 2025</option>
+                </select>
+            </div>
+            <button id="apply-filters-areas" class="btn btn-primary">Aplicar Filtros</button>
+        </div>
+
+        <!-- Overview View -->
+        <div id="overview-view" class="view-content">
+            <div class="areas-grid">
+                <!-- Se llenarán dinámicamente con JavaScript -->
+            </div>
+        </div>
+
+        <!-- HeatMap View -->
+        <div id="heatmap-view" class="view-content" style="display:none;">
+            <div class="heatmap-container">
+                <h3>🔥 HeatMap de Indicadores x Áreas</h3>
+                <div id="areas-heatmap" class="chart-plot"></div>
+            </div>
+        </div>
+
+        <!-- Trends View -->
+        <div id="trends-view" class="view-content" style="display:none;">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>📈 Tendencias Críticas</h3>
+                    <div id="critical-trends" class="chart-plot"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>✅ Casos de Éxito - Replicar</h3>
+                    <div id="success-cases" class="chart-plot"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>🎯 Performance Perfecto - Mantener</h3>
+                    <div id="perfect-performance" class="chart-plot"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>⚠️ Áreas Abajo de 80%</h3>
+                    <div id="below-80-areas" class="chart-plot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Cargando indicadores por áreas...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/telegram_optimization.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/indicadores_areas.js') }}"></script>
+</body>
+</html>

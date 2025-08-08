@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISEÑO DASHBOARD - APROBACIÓN</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px dashed #3b82f6;
+            border-radius: 8px;
+            background: #f0f9ff;
+        }
+        .mockup-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .kpi-mockup {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .map-mockup {
+            height: 400px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #6b7280;
+        }
+        .chart-mockup {
+            height: 300px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+        .heat-map-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .indicator-card {
+            padding: 15px;
+            text-align: center;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+        }
+        .heat-excellent { background-color: #059669; }
+        .heat-good { background-color: #10b981; }
+        .heat-warning { background-color: #f59e0b; }
+        .heat-critical { background-color: #dc2626; }
+        
+        .filter-mockup {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            margin: 0 5px;
+        }
+        
+        .tab-mockup {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .tab-active {
+            background: #3b82f6;
+            color: white;
+        }
+        .tab-inactive {
+            background: white;
+            border: 1px solid #e5e7eb;
+        }
+        
+        h1 { color: #1f2937; }
+        h2 { color: #374151; margin-top: 40px; }
+        h3 { color: #4b5563; }
+        
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .approval-section {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 DISEÑO DASHBOARD SUPERVISIÓN OPERATIVA - PARA APROBACIÓN</h1>
+        
+        <div class="note">
+            <strong>📌 NOTA:</strong> Este es un mockup para aprobar el diseño y controles antes de programar. 
+            Los datos mostrados son de ejemplo basados en los datos reales obtenidos.
+        </div>
+
+        <!-- HEADER SECTION -->
+        <div class="section">
+            <h2>1. HEADER - TÍTULO Y FILTROS GLOBALES</h2>
+            <div class="mockup-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 style="margin: 0;">Supervisión Operativa Q3 2025</h1>
+                        <p style="color: #6b7280; margin: 5px 0;">Dashboard de Evaluación de Sucursales</p>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <select class="filter-mockup">
+                            <option>Q3 2025</option>
+                            <option>Q2 2025</option>
+                            <option>Q1 2025</option>
+                            <option>TODOS</option>
+                        </select>
+                        <select class="filter-mockup">
+                            <option>Todos los Estados</option>
+                            <option>Nuevo León</option>
+                            <option>Tamaulipas</option>
+                            <option>Coahuila</option>
+                            <option>Querétaro</option>
+                        </select>
+                        <select class="filter-mockup">
+                            <option>Todos los Grupos</option>
+                            <option>EXPO</option>
+                            <option>OGAS</option>
+                            <option>PLOG NUEVO LEON</option>
+                            <option>TEPEYAC</option>
+                        </select>
+                        <button style="background: #3b82f6; color: white; padding: 8px 16px; border: none; border-radius: 6px;">
+                            🔍 Filtrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPIS SECTION -->
+        <div class="section">
+            <h2>2. KPIs PRINCIPALES</h2>
+            <div class="grid-4">
+                <div class="kpi-mockup">
+                    <div style="font-size: 36px; font-weight: bold; color: #059669;">26</div>
+                    <div style="color: #6b7280;">Sucursales Evaluadas</div>
+                    <div style="color: #10b981; font-size: 12px;">Q3 2025</div>
+                </div>
+                <div class="kpi-mockup">
+                    <div style="font-size: 36px; font-weight: bold; color: #3b82f6;">91.39%</div>
+                    <div style="color: #6b7280;">Promedio General</div>
+                    <div style="color: #10b981; font-size: 12px;">↑ +2.48% vs Q2</div>
+                </div>
+                <div class="kpi-mockup">
+                    <div style="font-size: 36px; font-weight: bold; color: #8b5cf6;">29</div>
+                    <div style="color: #6b7280;">Indicadores</div>
+                    <div style="color: #6b7280; font-size: 12px;">Con porcentaje</div>
+                </div>
+                <div class="kpi-mockup">
+                    <div style="font-size: 36px; font-weight: bold; color: #f59e0b;">20</div>
+                    <div style="color: #6b7280;">Grupos Operativos</div>
+                    <div style="color: #6b7280; font-size: 12px;">Activos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAPS SECTION -->
+        <div class="section">
+            <h2>3. MAPAS INTERACTIVOS</h2>
+            <div class="grid-2">
+                <div class="mockup-card">
+                    <h3>🗺️ Mapa de Calor por Estados</h3>
+                    <div class="map-mockup">
+                        MAPA DE MÉXICO<br>
+                        con estados coloreados<br>
+                        según promedio
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 12px;">
+                        <span>🟢 ≥90%</span>
+                        <span>🟢 80-89%</span>
+                        <span>🟡 70-79%</span>
+                        <span style="font-weight: bold;">🔴 <70%</span>
+                    </div>
+                </div>
+                <div class="mockup-card">
+                    <h3>📍 Pin Map de Sucursales</h3>
+                    <div class="map-mockup">
+                        MAPA CON PINS<br>
+                        26 sucursales<br>
+                        con auto-zoom
+                    </div>
+                    <div style="font-size: 12px; color: #6b7280; text-align: center; margin-top: 10px;">
+                        Click en pin para ver detalles
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INDICADORES SECTION -->
+        <div class="section">
+            <h2>4. HEAT MAP DE 29 INDICADORES</h2>
+            <div class="mockup-card">
+                <h3>Visualización tipo Heat Map (70% = Límite Crítico)</h3>
+                <div class="heat-map-grid">
+                    <!-- Top 5 -->
+                    <div class="indicator-card heat-excellent">
+                        LAVADO UTENSILIOS<br>100%
+                    </div>
+                    <div class="indicator-card heat-excellent">
+                        CAJAS TOTOPO<br>100%
+                    </div>
+                    <div class="indicator-card heat-excellent">
+                        ALMACEN QUÍMICOS<br>100%
+                    </div>
+                    <div class="indicator-card heat-excellent">
+                        TIEMPOS SERVICIO<br>100%
+                    </div>
+                    <div class="indicator-card heat-excellent">
+                        BARRA SALSAS<br>99.3%
+                    </div>
+                    
+                    <!-- Algunos buenos -->
+                    <div class="indicator-card heat-good">
+                        REFRIGERADORES<br>96.0%
+                    </div>
+                    <div class="indicator-card heat-good">
+                        BARRA SERVICIO<br>95.6%
+                    </div>
+                    <div class="indicator-card heat-good">
+                        ALMACEN GENERAL<br>95.4%
+                    </div>
+                    <div class="indicator-card heat-good">
+                        BAÑO CLIENTES<br>93.0%
+                    </div>
+                    <div class="indicator-card heat-good">
+                        CUARTO FRÍO<br>90.1%
+                    </div>
+                    
+                    <!-- Algunos regulares -->
+                    <div class="indicator-card heat-warning">
+                        ASADORES<br>81.1%
+                    </div>
+                    <div class="indicator-card heat-warning">
+                        AVISO FUNC.<br>74.9%
+                    </div>
+                    <div class="indicator-card heat-warning">
+                        FREIDORA PAPA<br>72.0%
+                    </div>
+                    <div class="indicator-card heat-warning">
+                        EXTERIOR<br>71.9%
+                    </div>
+                    
+                    <!-- Crítico -->
+                    <div class="indicator-card heat-critical">
+                        FREIDORAS<br>69.6%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOP/BOTTOM SECTION -->
+        <div class="section">
+            <h2>5. TOP 5 / BOTTOM 5 INDICADORES</h2>
+            <div class="grid-2">
+                <div class="mockup-card" style="background: #d1fae5;">
+                    <h3>🏆 Top 5 - Mejores Indicadores</h3>
+                    <ol>
+                        <li>LAVADO DE UTENSILIOS - 100%</li>
+                        <li>CAJAS DE TOTOPO EMPACADO - 100%</li>
+                        <li>ALMACEN QUÍMICOS - 100%</li>
+                        <li>TIEMPOS DE SERVICIO - 100%</li>
+                        <li>BARRA DE SALSAS - 99.30%</li>
+                    </ol>
+                </div>
+                <div class="mockup-card" style="background: #fee2e2;">
+                    <h3>🚨 Bottom 5 - Áreas de Oportunidad</h3>
+                    <ol>
+                        <li>FREIDORAS - 69.60% ⚠️ CRÍTICO</li>
+                        <li>EXTERIOR SUCURSAL - 71.87%</li>
+                        <li>FREIDORA DE PAPA - 72.03%</li>
+                        <li>AVISO DE FUNCIONAMIENTO - 74.87%</li>
+                        <li>ASADORES - 81.11%</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="section">
+            <h2>6. GRÁFICAS ADICIONALES</h2>
+            <div class="grid-3">
+                <div class="mockup-card">
+                    <h3>📊 Tendencia Trimestral</h3>
+                    <div class="chart-mockup">
+                        Gráfica de línea<br>
+                        Q1→Q2→Q3
+                    </div>
+                </div>
+                <div class="mockup-card">
+                    <h3>🏢 Por Grupo Operativo</h3>
+                    <div class="chart-mockup">
+                        Gráfica de barras<br>
+                        Top 10 grupos
+                    </div>
+                </div>
+                <div class="mockup-card">
+                    <h3>📍 Por Estado</h3>
+                    <div class="chart-mockup">
+                        Gráfica circular<br>
+                        Distribución
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATA TABLE SECTION -->
+        <div class="section">
+            <h2>7. TABLA DE DATOS DETALLADOS</h2>
+            <div class="mockup-card">
+                <h3>Detalle de Sucursales (con paginación)</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f3f4f6;">
+                            <th style="padding: 10px; text-align: left;">Sucursal</th>
+                            <th style="padding: 10px;">Grupo</th>
+                            <th style="padding: 10px;">Estado</th>
+                            <th style="padding: 10px;">Promedio</th>
+                            <th style="padding: 10px;">Tier</th>
+                            <th style="padding: 10px;">Última Evaluación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 10px;">79 Rio Bravo</td>
+                            <td style="padding: 10px;">GRUPO RIO BRAVO</td>
+                            <td style="padding: 10px;">Tamaulipas</td>
+                            <td style="padding: 10px; font-weight: bold; color: #059669;">90.0%</td>
+                            <td style="padding: 10px;"><span style="background: #059669; color: white; padding: 2px 8px; border-radius: 4px;">Excelente</span></td>
+                            <td style="padding: 10px;">06-Ago-2025</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 10px;">15 Plaza Ogas</td>
+                            <td style="padding: 10px;">OGAS</td>
+                            <td style="padding: 10px;">Nuevo León</td>
+                            <td style="padding: 10px; font-weight: bold; color: #10b981;">87.3%</td>
+                            <td style="padding: 10px;"><span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px;">Bueno</span></td>
+                            <td style="padding: 10px;">05-Ago-2025</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONTROLES Y CARACTERÍSTICAS -->
+        <div class="section">
+            <h2>8. CONTROLES Y CARACTERÍSTICAS ESPECIALES</h2>
+            <div class="grid-2">
+                <div class="mockup-card">
+                    <h3>🎛️ Controles Interactivos</h3>
+                    <ul>
+                        <li>Filtros dinámicos por trimestre, estado y grupo</li>
+                        <li>Auto-zoom en mapa de pins</li>
+                        <li>Tooltips al pasar mouse sobre indicadores</li>
+                        <li>Click en pins para ver detalles de sucursal</li>
+                        <li>Exportar datos a Excel/CSV</li>
+                        <li>Búsqueda rápida de sucursales</li>
+                    </ul>
+                </div>
+                <div class="mockup-card">
+                    <h3>🎨 Características Visuales</h3>
+                    <ul>
+                        <li>Colores consistentes con límite rojo en 70%</li>
+                        <li>Responsive para móvil/tablet/desktop</li>
+                        <li>Animaciones suaves en transiciones</li>
+                        <li>Modo oscuro opcional</li>
+                        <li>Actualización automática cada 5 minutos</li>
+                        <li>Indicadores de carga mientras se obtienen datos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- APPROVAL SECTION -->
+        <div class="approval-section">
+            <h2>✅ APROBACIÓN DE DISEÑO</h2>
+            <p><strong>Por favor revisa y confirma:</strong></p>
+            <ul>
+                <li>✓ Los KPIs mostrados son correctos (26 sucursales, 91.39% promedio, etc.)</li>
+                <li>✓ El sistema de colores con límite rojo en 70% es correcto</li>
+                <li>✓ Los 29 indicadores se muestran correctamente en heat map</li>
+                <li>✓ Los mapas (heat map estados y pin map sucursales) son necesarios</li>
+                <li>✓ Los filtros por trimestre, estado y grupo son suficientes</li>
+                <li>✓ La tabla de detalles con paginación es adecuada</li>
+                <li>✓ Las gráficas adicionales son útiles</li>
+            </ul>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 8px;">
+                <p><strong>¿Algún cambio o ajuste antes de proceder con la programación?</strong></p>
+                <p>Por ejemplo:</p>
+                <ul>
+                    <li>¿Agregar más filtros?</li>
+                    <li>¿Cambiar el orden de las secciones?</li>
+                    <li>¿Otros tipos de gráficas?</li>
+                    <li>¿Diferentes visualizaciones?</li>
+                    <li>¿Funcionalidades adicionales?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Dashboard Estandarización Operativa</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="{{ url_for('static', filename='js/mexico-geojson.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/apex_charts_integration.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/metabase_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/apex_charts_styles.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>📊 Dashboard Principal - Estandarización Operativa</h1>
+            <div class="status-indicator">
+                <span class="status-dot" id="connection-status"></span>
+                <span class="status-text">Conectando...</span>
+            </div>
+            <!-- Indicador de gráficos modernos -->
+            <div style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; margin-top: 8px; font-size: 11px; text-align: center;">
+                ✨ Gráficos Modernos ApexCharts + Plotly
+            </div>
+            <!-- Navegación a Indicadores por Áreas -->
+            <div style="margin-top: 10px; text-align: center;">
+                <a href="/indicadores-areas" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 600;">
+                    📈 Ver Indicadores por Áreas
+                </a>
+            </div>
+        </header>
+
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="quarter-filter">Trimestre:</label>
+                <select id="quarter-filter" class="filter-select">
+                    <option value="ALL" selected>Todos los trimestres</option>
+                    <option value="Q1">Q1 2025</option>
+                    <option value="Q2">Q2 2025</option>
+                    <option value="Q3">Q3 2025</option>
+                    <option value="Q4">Q4 2025</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="estado-filter">Estado:</label>
+                <select id="estado-filter" class="filter-select">
+                    <option value="">Todos los estados</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="grupo-filter">Grupo Operativo:</label>
+                <select id="grupo-filter" class="filter-select">
+                    <option value="">Todos los grupos</option>
+                </select>
+            </div>
+            <button id="apply-filters" class="btn btn-primary">Aplicar Filtros</button>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-cards-section">
+            <div class="kpi-card kpi-primary">
+                <h3>Promedio General</h3>
+                <div class="kpi-value" id="promedio-general">--</div>
+                <div class="kpi-period" id="periodo-actual">Q3 2025</div>
+                <div class="kpi-change" id="cambio-promedio">
+                    <span class="change-indicator">--</span>
+                    <span class="change-text">vs trimestre anterior</span>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-secondary">
+                <h3># Supervisiones</h3>
+                <div class="kpi-value" id="num-supervisiones">--</div>
+                <div class="kpi-subtitle">supervisiones</div>
+                <div class="kpi-change" id="cambio-supervisiones">
+                    <span class="change-indicator">--</span>
+                    <span class="change-text">vs trimestre anterior</span>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-meta">
+                <h3>Meta</h3>
+                <div class="kpi-value" id="meta-valor">84.54%</div>
+                <div class="kpi-subtitle">objetivo</div>
+                <div class="kpi-status" id="meta-status">
+                    <span class="status-indicator">--</span>
+                    <span class="status-text">evaluando...</span>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-coverage">
+                <h3>Cobertura</h3>
+                <div class="kpi-value" id="num-sucursales">--</div>
+                <div class="kpi-subtitle">sucursales</div>
+                <div class="kpi-extra" id="num-estados">-- estados</div>
+            </div>
+        </div>
+
+        <!-- Main Charts Grid -->
+        <div class="charts-grid">
+            <!-- Mapa Choropleth México -->
+            <div class="chart-container map-container">
+                <h3>🗺️ Mapa de México por Estados</h3>
+                <div id="mexico-choropleth" class="chart-plot"></div>
+            </div>
+
+            <!-- Estados Rankings -->
+            <div class="chart-container map-container">
+                <h3>📊 Ranking de Estados</h3>
+                <div id="estados-ranking" class="chart-plot"></div>
+            </div>
+
+            <!-- Pin Map Detallado -->
+            <div class="chart-container map-container">
+                <h3>📍 Distribución EPL México (Pin Map)</h3>
+                <div id="pin-map" class="chart-plot"></div>
+                <div class="map-controls">
+                    <button id="zoom-in" class="btn btn-sm">🔍+</button>
+                    <button id="zoom-out" class="btn btn-sm">🔍-</button>
+                    <button id="reset-zoom" class="btn btn-sm">🎯</button>
+                </div>
+            </div>
+
+
+            <!-- Calificación por Estado -->
+            <div class="chart-container">
+                <h3>📊 Calificación x Estado</h3>
+                <div id="estados-chart" class="chart-plot"></div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #0d47a1;"></div>
+                        <span>Excelente (95-100%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #1976d2;"></div>
+                        <span>Muy bueno (85-94%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #42a5f5;"></div>
+                        <span>Bueno (75-84%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #90caf9;"></div>
+                        <span>Regular (70-74%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calificación por Grupo Operativo -->
+            <div class="chart-container">
+                <h3>🏢 Calificación x Grupo Operativo</h3>
+                <div id="grupos-chart" class="chart-plot"></div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #0d47a1;"></div>
+                        <span>Excelente (95-100%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #1976d2;"></div>
+                        <span>Muy bueno (85-94%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #42a5f5;"></div>
+                        <span>Bueno (75-84%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking de Sucursales -->
+            <div class="chart-container ranking-container">
+                <h3>🏆 Calificación x Sucursal (Ranking)</h3>
+                <div id="sucursales-ranking" class="chart-plot"></div>
+                <div class="ranking-controls">
+                    <button id="show-top-10" class="btn btn-sm active">Top 10</button>
+                    <button id="show-top-25" class="btn btn-sm">Top 25</button>
+                    <button id="show-all" class="btn btn-sm">Todas</button>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #0d47a1;"></div>
+                        <span>Excelente (98-100%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #1976d2;"></div>
+                        <span>Muy bueno (90-97%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #42a5f5;"></div>
+                        <span>Bueno (80-89%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #90caf9;"></div>
+                        <span>Regular (75-79%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métricas Adicionales -->
+            <div class="chart-container metrics-container">
+                <h3>📈 Métricas Adicionales</h3>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-title">Promedio Nacional</div>
+                        <div class="metric-value" id="promedio-nacional">--</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-title">Mejor Estado</div>
+                        <div class="metric-value" id="mejor-estado">--</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-title">Peor Estado</div>
+                        <div class="metric-value" id="peor-estado">--</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-title">Rango</div>
+                        <div class="metric-value" id="rango-performance">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Export -->
+        <div class="export-section">
+            <h3>📤 Exportar Datos</h3>
+            <div class="export-buttons">
+                <button id="export-pdf" class="btn btn-secondary">📄 Exportar PDF</button>
+                <button id="export-excel" class="btn btn-secondary">📊 Exportar Excel</button>
+                <button id="export-json" class="btn btn-secondary">💾 Exportar JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Cargando dashboard...</p>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Error</h3>
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/telegram_optimization.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/metabase_dashboard.js') }}"></script>
+</body>
+</html>

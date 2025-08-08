@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Calificación General - Supervision Operativa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #F9FBFC;
+            color: #2E3138;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #E4E8EC;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2E3138;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            background: #509EE3;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background: #3d8bdb;
+        }
+        
+        .nav-btn.secondary {
+            background: #A663CC;
+        }
+        
+        .nav-btn.secondary:hover {
+            background: #8f4fb8;
+        }
+        
+        .dashboard-container {
+            padding: 0;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+        
+        .metabase-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #7C8B8F;
+            font-size: 16px;
+        }
+        
+        .info-banner {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 1px solid #bee5eb;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                text-align: center;
+                max-width: 150px;
+            }
+            
+            .dashboard-container {
+                height: calc(100vh - 120px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            🎯 Dashboard 1: Calificación General
+        </h1>
+        <div class="nav-buttons">
+            <a href="/dashboard/indicadores-metabase" class="nav-btn secondary">📊 Indicadores x Área</a>
+            <a href="/" class="nav-btn">🏠 Inicio</a>
+        </div>
+    </div>
+    
+    <div class="info-banner">
+        📅 Datos actualizados diariamente desde GitHub ETL → Neon Database → Metabase | 🔄 Filtros: Estado, Trimestre, Grupo Operativo
+    </div>
+    
+    <div class="dashboard-container">
+        <div class="loading" id="loadingIndicator">
+            🔄 Cargando dashboard de Metabase...
+        </div>
+        
+        <!-- Metabase iframe with fallback -->
+        <iframe
+            id="metabaseFrame"
+            class="metabase-iframe"
+            src=""
+            frameborder="0"
+            allowtransparency="true"
+            allowfullscreen="true"
+            allow="fullscreen"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+            style="display: none;"
+            onload="frameLoaded()"
+            onerror="frameError()"
+        ></iframe>
+        
+        <!-- Fallback: Direct link if iframe fails -->
+        <div id="fallbackContent" style="display: none; text-align: center; padding: 40px;">
+            <h3>📊 Dashboard de Metabase</h3>
+            <p>El iframe no pudo cargar. Usa el enlace directo:</p>
+            <a href="https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68" 
+               target="_blank" 
+               class="nav-btn" 
+               style="display: inline-block; margin: 20px;">
+                🚀 Abrir Dashboard en Nueva Pestaña
+            </a>
+            <p><small>Nota: El dashboard se abrirá en una nueva pestaña de tu navegador</small></p>
+        </div>
+    </div>
+
+    <script>
+        const METABASE_URL = 'https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68';
+        let frameLoadTimeout;
+        let checkInterval;
+        let retryCount = 0;
+        
+        function frameLoaded() {
+            clearTimeout(frameLoadTimeout);
+            clearInterval(checkInterval);
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('metabaseFrame').style.display = 'block';
+            document.getElementById('fallbackContent').style.display = 'none';
+            console.log('✅ Metabase dashboard loaded successfully');
+        }
+        
+        function frameError() {
+            clearTimeout(frameLoadTimeout);
+            clearInterval(checkInterval);
+            showFallback();
+            console.error('❌ Error loading Metabase dashboard - connection refused');
+        }
+        
+        function showFallback() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('metabaseFrame').style.display = 'none';
+            document.getElementById('fallbackContent').style.display = 'block';
+        }
+        
+        function retryLoad() {
+            retryCount++;
+            if (retryCount > 3) {
+                showFallback();
+                return;
+            }
+            
+            document.getElementById('loadingIndicator').innerHTML = `🔄 Reintentando cargar dashboard... (${retryCount}/3)`;
+            document.getElementById('loadingIndicator').style.display = 'flex';
+            document.getElementById('metabaseFrame').style.display = 'none';
+            document.getElementById('fallbackContent').style.display = 'none';
+            
+            // Reload iframe
+            const iframe = document.getElementById('metabaseFrame');
+            iframe.src = '';
+            setTimeout(() => {
+                iframe.src = METABASE_URL;
+                startLoadingTimeout();
+            }, 1000);
+        }
+        
+        function testMetabaseConnection() {
+            // Test if Metabase URL is accessible
+            fetch(METABASE_URL, { mode: 'no-cors' })
+                .then(() => {
+                    console.log('✅ Metabase URL is accessible');
+                    loadIframe();
+                })
+                .catch(() => {
+                    console.log('❌ Metabase URL not accessible - showing fallback');
+                    showFallback();
+                });
+        }
+        
+        function loadIframe() {
+            const iframe = document.getElementById('metabaseFrame');
+            iframe.src = METABASE_URL;
+            startLoadingTimeout();
+        }
+        
+        function startLoadingTimeout() {
+            // Show fallback after 10 seconds if iframe doesn't load
+            frameLoadTimeout = setTimeout(() => {
+                console.log('⏰ Loading timeout - showing fallback');
+                showFallback();
+            }, 10000);
+            
+            // Check iframe status every 2 seconds
+            let checkCount = 0;
+            checkInterval = setInterval(() => {
+                checkCount++;
+                try {
+                    const iframe = document.getElementById('metabaseFrame');
+                    // Check if iframe has loaded content
+                    if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                        console.log('✅ Iframe content loaded');
+                        frameLoaded();
+                        return;
+                    }
+                } catch (e) {
+                    // Cross-origin restriction - this is normal
+                    if (checkCount === 3) {
+                        // If we get cross-origin error, iframe is probably loading
+                        console.log('🔄 Cross-origin detected - iframe likely loading');
+                        frameLoaded();
+                        return;
+                    }
+                }
+                
+                // Stop checking after 5 attempts (10 seconds)
+                if (checkCount >= 5) {
+                    clearInterval(checkInterval);
+                }
+            }, 2000);
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard Calificación General initialized');
+            console.log('📊 Testing Metabase URL:', METABASE_URL);
+            
+            // Try to load iframe directly first
+            loadIframe();
+        });
+    </script>
+</body>
+</html>

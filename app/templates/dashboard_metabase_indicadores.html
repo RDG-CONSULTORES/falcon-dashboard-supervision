@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 29 Indicadores por Área - Supervision Operativa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #F9FBFC;
+            color: #2E3138;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #E4E8EC;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2E3138;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            background: #509EE3;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background: #3d8bdb;
+        }
+        
+        .nav-btn.secondary {
+            background: #A663CC;
+        }
+        
+        .nav-btn.secondary:hover {
+            background: #8f4fb8;
+        }
+        
+        .dashboard-container {
+            padding: 0;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+        
+        .metabase-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        
+        .loading, .placeholder {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            color: #7C8B8F;
+            font-size: 16px;
+            text-align: center;
+            gap: 20px;
+        }
+        
+        .info-banner {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 1px solid #bee5eb;
+        }
+        
+        .placeholder-card {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #E4E8EC;
+            max-width: 600px;
+            margin: 20px;
+        }
+        
+        .placeholder-card h2 {
+            color: #2E3138;
+            margin-bottom: 15px;
+        }
+        
+        .placeholder-card p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                text-align: center;
+                max-width: 150px;
+            }
+            
+            .dashboard-container {
+                height: calc(100vh - 120px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            📊 Dashboard 2: 29 Indicadores por Área
+        </h1>
+        <div class="nav-buttons">
+            <a href="/dashboard/calificacion-metabase" class="nav-btn secondary">🎯 Calificación General</a>
+            <a href="/" class="nav-btn">🏠 Inicio</a>
+        </div>
+    </div>
+    
+    <div class="info-banner">
+        📅 Datos actualizados diariamente desde GitHub ETL → Neon Database → Metabase | 📊 29 Indicadores de Supervisión Operativa
+    </div>
+    
+    <div class="dashboard-container">
+        <div class="placeholder">
+            <div class="placeholder-card">
+                <h2>📊 Dashboard 2: 29 Indicadores por Área</h2>
+                <p><strong>📋 Contenido esperado:</strong></p>
+                <p>• 29 indicadores específicos por área de evaluación</p>
+                <p>• Filtros por Estado, Trimestre, y Grupo Operativo</p>
+                <p>• Análisis por área de supervisión operativa</p>
+                <p>• Datos en tiempo real desde tu base de datos Neon</p>
+                <br>
+                <p><strong>🔗 Para completar este dashboard:</strong></p>
+                <p>1. Comparte el iframe/URL del Dashboard 2 de Metabase</p>
+                <p>2. Lo integraré inmediatamente como el Dashboard 1</p>
+                <p>3. Tendrás ambos dashboards funcionando perfectamente</p>
+                <br>
+                <p style="color: #509EE3;"><strong>✅ El Dashboard 1 ya está funcionando con Metabase</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard Indicadores por Área initialized');
+            console.log('⏳ Waiting for Metabase iframe URL for Dashboard 2');
+        });
+    </script>
+</body>
+</html>

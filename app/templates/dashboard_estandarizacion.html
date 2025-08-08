@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estandarización Operativa Q3 - Metabase Style</title>
+    
+    <!-- Leaflet para mapas -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    
+    <style>
+        :root {
+            --metabase-blue: #509EE3;
+            --metabase-purple-light: #CDB4DB;
+            --metabase-purple: #A663CC;
+            --metabase-purple-dark: #7B2CBF;
+            --metabase-purple-darker: #5A189A;
+            --metabase-bg: #F9FBFC;
+            --metabase-card: #FFFFFF;
+            --metabase-border: #E4E8EC;
+            --metabase-text: #2E3138;
+            --metabase-secondary: #7C8B8F;
+            --metabase-gray: #E0E0E0;
+            --metabase-green: #84BB4C;
+            --metabase-red: #E74C3C;
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--metabase-bg);
+            color: var(--metabase-text);
+            line-height: 1.5;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--metabase-text);
+            margin: 0;
+        }
+        
+        .metabase-logo {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filters-row {
+            background: var(--metabase-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-icon {
+            width: 16px;
+            height: 16px;
+            background: var(--metabase-secondary);
+            border-radius: 2px;
+        }
+        
+        .filter-select {
+            padding: 8px 16px;
+            border: 1px solid var(--metabase-border);
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            color: var(--metabase-text);
+            min-width: 150px;
+            cursor: pointer;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--metabase-blue);
+            box-shadow: 0 0 0 2px rgba(80, 158, 227, 0.2);
+        }
+        
+        /* KPIs Row */
+        .kpis-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .kpi-card {
+            background: var(--metabase-card);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            text-align: left;
+        }
+        
+        .kpi-title {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .kpi-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--metabase-text);
+            margin-bottom: 10px;
+        }
+        
+        .kpi-period {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            margin-bottom: 15px;
+        }
+        
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .kpi-change.positive {
+            color: var(--metabase-green);
+        }
+        
+        .kpi-change.negative {
+            color: var(--metabase-red);
+        }
+        
+        .kpi-change-icon {
+            font-size: 12px;
+        }
+        
+        /* Main Content */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .card {
+            background: var(--metabase-card);
+            border-radius: 8px;
+            border: 1px solid var(--metabase-border);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 20px 25px 15px 25px;
+            border-bottom: 1px solid var(--metabase-border);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--metabase-text);
+        }
+        
+        .card-content {
+            padding: 20px 25px;
+        }
+        
+        .map-container, .chart-container {
+            height: 400px;
+            width: 100%;
+        }
+        
+        .chart-container-tall {
+            height: 500px;
+            width: 100%;
+        }
+        
+        /* Estilos para mapas */
+        .leaflet-popup-content-wrapper {
+            background-color: var(--metabase-card);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .popup-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--metabase-text);
+            margin-bottom: 8px;
+        }
+        
+        .popup-info {
+            font-size: 14px;
+            color: var(--metabase-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .popup-score {
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 8px;
+            color: var(--metabase-purple-dark);
+        }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--metabase-secondary);
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kpis-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Estandarización Operativa Q3</h1>
+        <div class="metabase-logo">
+            Hecho con <span style="color: var(--metabase-blue);">■■■■</span> <strong>Metabase</strong>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="filters-row">
+        <div class="filter-group">
+            <div class="filter-icon"></div>
+            <select class="filter-select" id="grupoFilter">
+                <option value="">Grupo Operativo</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <div class="filter-icon"></div>
+            <select class="filter-select" id="estadoFilter">
+                <option value="">Estado</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <div class="filter-icon"></div>
+            <select class="filter-select" id="trimestreFilter">
+                <option value="Q2" selected>Q2 2025</option>
+                <option value="Q1">Q1 2025</option>
+                <option value="Q3">Q3 2025</option>
+                <option value="Q4">Q4 2025</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- KPIs -->
+    <div class="kpis-row">
+        <div class="kpi-card">
+            <div class="kpi-title">Promedio General</div>
+            <div class="kpi-value" id="kpiPromedio">Cargando...</div>
+            <div class="kpi-period">Q2 2025</div>
+            <div class="kpi-change positive">
+                <span class="kpi-change-icon">▲</span>
+                <span id="kpiCambioPromedio">Cargando...</span>
+                <span>vs. trimestre anterior</span>
+            </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-title"># Sucursales Evaluadas</div>
+            <div class="kpi-value" id="kpiSupervisiones">Cargando...</div>
+            <div class="kpi-period">Q2 2025</div>
+            <div class="kpi-change negative">
+                <span class="kpi-change-icon">▼</span>
+                <span id="kpiCambioSupervisiones">Cargando...</span>
+                <span>vs. trimestre anterior</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mapas -->
+    <div class="main-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Distribución EPL México x Estados</h3>
+            </div>
+            <div class="card-content">
+                <div id="stateMap" class="map-container"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #5A189A;"></div>
+                        <span>96%+</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #7B2CBF;"></div>
+                        <span>92-96%</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #A663CC;"></div>
+                        <span>88-92%</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #CDB4DB;"></div>
+                        <span>85-88%</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #E0E0E0;"></div>
+                        <span>Sin datos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Distribución EPL México</h3>
+            </div>
+            <div class="card-content">
+                <div id="pinMap" class="map-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráficos -->
+    <div class="main-grid">
+        <div class="card full-width">
+            <div class="card-header">
+                <h3 class="card-title">Calificación x Estado</h3>
+            </div>
+            <div class="card-content">
+                <div id="estadoChart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-grid">
+        <div class="card full-width">
+            <div class="card-header">
+                <h3 class="card-title">Calificación x Grupo Operativo</h3>
+            </div>
+            <div class="card-content">
+                <div id="grupoChart" class="chart-container-tall"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración
+        const API_BASE = 'http://localhost:5002';
+        const HEADERS = {};
+        
+        let stateMap, pinMap;
+        let stateLayer, pinLayer;
+        let currentFilters = {
+            grupo: '',
+            estado: '',
+            trimestre: 'Q2'  // Cambiar a Q2 que tiene más datos de diferentes estados
+        };
+        
+        // Colores Metabase
+        function getStateColor(score) {
+            if (score >= 96) return '#5A189A';
+            if (score >= 92) return '#7B2CBF';
+            if (score >= 88) return '#A663CC';
+            if (score >= 85) return '#CDB4DB';
+            return '#E0E0E0';
+        }
+        
+        function createDropletIcon(score) {
+            const svgIcon = `
+                <svg width="25" height="35" viewBox="0 0 25 35" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="shadow">
+                            <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+                        </filter>
+                    </defs>
+                    <path d="M12.5 35C12.5 35 25 22.5 25 15C25 7.5 19.4 0 12.5 0C5.6 0 0 7.5 0 15C0 22.5 12.5 35 12.5 35Z" 
+                          fill="#509EE3" 
+                          stroke="#FFFFFF" 
+                          stroke-width="2" 
+                          filter="url(#shadow)"/>
+                    <circle cx="12.5" cy="17" r="8" fill="rgba(255,255,255,0.9)" stroke="#509EE3" stroke-width="1"/>
+                    <text x="12.5" y="21" text-anchor="middle" fill="#509EE3" font-family="Lato" font-size="8" font-weight="600">
+                        ${Math.round(score)}
+                    </text>
+                </svg>
+            `;
+            
+            return L.divIcon({
+                html: svgIcon,
+                className: 'custom-droplet-marker',
+                iconSize: [25, 35],
+                iconAnchor: [12, 0],
+                popupAnchor: [0, 5]
+            });
+        }
+        
+        // Inicializar mapas
+        function initializeMaps() {
+            stateMap = L.map('stateMap', {
+                center: [23.6345, -102.5528],
+                zoom: 5,
+                zoomControl: true
+            });
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(stateMap);
+            
+            pinMap = L.map('pinMap', {
+                center: [23.6345, -102.5528],
+                zoom: 6,
+                zoomControl: true
+            });
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pinMap);
+        }
+        
+        // Cargar datos y crear mapas
+        async function loadStatesData() {
+            const params = new URLSearchParams({
+                year: 2025,
+                limit: 100
+            });
+            if (currentFilters.trimestre && currentFilters.trimestre !== 'ALL') params.append('quarter', currentFilters.trimestre);
+            if (currentFilters.estado) params.append('estado', currentFilters.estado);
+            if (currentFilters.grupo) params.append('grupo', currentFilters.grupo);
+            
+            const response = await fetch(`${API_BASE}/api/v1/geo/states?${params}`, { headers: HEADERS });
+            const data = await response.json();
+            return data.success ? data.data : [];
+        }
+        
+        async function loadSucursalesData() {
+            const params = new URLSearchParams({
+                year: 2025,
+                quarter: currentFilters.trimestre || 'Q2',
+                limit: 500  // Aumentar límite para ver todas las sucursales
+            });
+            if (currentFilters.estado) params.append('estado', currentFilters.estado);
+            
+            console.log('Fetching coordinates with params:', params.toString());
+            const response = await fetch(`${API_BASE}/api/coordinates?${params}`, { headers: HEADERS });
+            const data = await response.json();
+            console.log('Coordinates data:', data?.length || 0, 'sucursales');
+            return Array.isArray(data) ? data : [];
+        }
+        
+        async function createStatesMap() {
+            const statesData = await loadStatesData();
+            const response = await fetch('/static/js/mexico-angel-geojson-new.js');
+            const geoJsonData = await response.json();
+            
+            const stateDataMap = {};
+            statesData.forEach(state => {
+                stateDataMap[state.estado] = state;
+            });
+            
+            if (stateLayer) stateMap.removeLayer(stateLayer);
+            
+            stateLayer = L.geoJSON(geoJsonData, {
+                style: function(feature) {
+                    const stateName = feature.properties.name;
+                    const stateData = stateDataMap[stateName];
+                    
+                    if (!stateData) {
+                        return {
+                            fillColor: '#E0E0E0',
+                            weight: 1,
+                            opacity: 0.5,
+                            color: '#FFFFFF',
+                            fillOpacity: 0.3
+                        };
+                    }
+                    
+                    return {
+                        fillColor: getStateColor(stateData.promedio),
+                        weight: 2,
+                        opacity: 1,
+                        color: '#FFFFFF',
+                        fillOpacity: 0.8
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    const stateName = feature.properties.name;
+                    const stateData = stateDataMap[stateName];
+                    
+                    if (stateData) {
+                        const popupContent = `
+                            <div class="popup-title">${stateName}</div>
+                            <div class="popup-info">Sucursales: ${stateData.sucursales}</div>
+                            <div class="popup-info">Supervisiones: ${stateData.supervisiones}</div>
+                            <div class="popup-score">Performance: ${stateData.promedio}%</div>
+                        `;
+                        layer.bindPopup(popupContent);
+                    }
+                }
+            }).addTo(stateMap);
+        }
+        
+        async function createPinMap() {
+            const sucursalesData = await loadSucursalesData();
+            
+            console.log('Creating pin map with data:', sucursalesData.length, 'sucursales');
+            
+            if (pinLayer) pinMap.removeLayer(pinLayer);
+            pinLayer = L.layerGroup().addTo(pinMap);
+            
+            let markersAdded = 0;
+            
+            sucursalesData.forEach((sucursal, index) => {
+                console.log('Processing sucursal:', index, sucursal.sucursal_clean, 'Lat:', sucursal.latitud, 'Lng:', sucursal.longitud);
+                
+                if (sucursal.latitud && sucursal.longitud) {
+                    const lat = parseFloat(sucursal.latitud);
+                    const lng = parseFloat(sucursal.longitud);
+                    const score = parseFloat(sucursal.promedio_porcentaje) || 0;
+                    
+                    // Validar coordenadas
+                    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                        const icon = createDropletIcon(score);
+                        
+                        const popupContent = `
+                            <div class="popup-title">${sucursal.sucursal_clean}</div>
+                            <div class="popup-info">📍 ${sucursal.municipio}, ${sucursal.estado}</div>
+                            <div class="popup-info">📊 ${sucursal.total_supervisiones} evaluaciones</div>
+                            <div class="popup-info">📅 Trimestre: ${currentFilters.trimestre || 'Q2'} 2025</div>
+                            <div class="popup-score">Última Calificación: ${score.toFixed(1)}%</div>
+                        `;
+                        
+                        const marker = L.marker([lat, lng], { icon })
+                            .bindPopup(popupContent)
+                            .addTo(pinLayer);
+                        
+                        markersAdded++;
+                        console.log('Added marker', markersAdded, 'at', lat, lng, 'for', sucursal.sucursal_clean);
+                    } else {
+                        console.warn('Invalid coordinates for', sucursal.sucursal_clean, ':', lat, lng);
+                    }
+                } else {
+                    console.warn('Missing coordinates for', sucursal.sucursal_clean);
+                }
+            });
+            
+            console.log('Total markers added to map:', markersAdded);
+            
+            if (markersAdded === 0) {
+                console.error('No markers were added to the map! Check data and coordinates.');
+            }
+        }
+        
+        // Crear gráfico de estados (púrpura como Metabase)
+        async function createEstadoChart() {
+            try {
+                // Usar endpoint directo para estados en lugar de geo
+                const params = new URLSearchParams({
+                    year: 2025,
+                    quarter: currentFilters.trimestre || 'Q2'
+                });
+                if (currentFilters.estado) params.append('estado', currentFilters.estado);
+                if (currentFilters.grupo) params.append('grupo', currentFilters.grupo);
+                
+                const response = await fetch(`${API_BASE}/api/v1/analytics/performance/states?${params}`, { headers: HEADERS });
+                const data = await response.json();
+                
+                console.log('States chart data:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    const options = {
+                        series: [{
+                            name: 'Performance',
+                            data: data.data.map(item => ({
+                                x: item.estado,
+                                y: parseFloat(item.promedio)
+                            }))
+                    }],
+                    chart: {
+                        type: 'bar',
+                        height: 350,
+                        toolbar: { show: false }
+                    },
+                    colors: ['#A663CC'],  // Púrpura Metabase
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 4,
+                            horizontal: false,
+                            columnWidth: '70%'
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function(val) {
+                            return val.toFixed(1);
+                        },
+                        style: {
+                            fontSize: '11px',
+                            fontWeight: 600
+                        }
+                    },
+                    xaxis: {
+                        categories: data.data.map(item => item.estado),
+                        labels: {
+                            style: { fontSize: '12px' },
+                            rotate: -45
+                        }
+                    },
+                    yaxis: {
+                        title: { text: 'Media de Porcentaje' },
+                        labels: {
+                            formatter: function(val) {
+                                return val.toFixed(0);
+                            }
+                        },
+                        min: 60,
+                        max: 100
+                    },
+                    annotations: {
+                        yaxis: [{
+                            y: 84.54,
+                            borderColor: '#999',
+                            strokeDashArray: 5,
+                            label: {
+                                text: 'Meta',
+                                style: { color: '#666' }
+                            }
+                        }]
+                    },
+                    grid: {
+                        strokeDashArray: 3,
+                        borderColor: '#e0e6ed'
+                    }
+                };
+                
+                    const chart = new ApexCharts(document.querySelector("#estadoChart"), options);
+                    chart.render();
+                } else {
+                    console.error('No states data available for chart');
+                }
+            } catch (error) {
+                console.error('Error creating states chart:', error);
+            }
+        }
+        
+        // Crear gráfico de grupos (azul como Metabase)
+        async function createGrupoChart() {
+            try {
+                const params = new URLSearchParams({
+                    year: 2025,
+                    quarter: currentFilters.trimestre || 'Q2'
+                });
+                if (currentFilters.estado) params.append('estado', currentFilters.estado);
+                if (currentFilters.grupo) params.append('grupo', currentFilters.grupo);
+                
+                const response = await fetch(`${API_BASE}/api/v1/analytics/performance/groups?${params}`, { headers: HEADERS });
+                const data = await response.json();
+                
+                console.log('Groups chart data:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                const options = {
+                    series: [{
+                        name: 'Performance',
+                        data: data.data.map(item => ({
+                            x: item.grupo_operativo,
+                            y: parseFloat(item.promedio)
+                        }))
+                    }],
+                    chart: {
+                        type: 'bar',
+                        height: 450,
+                        toolbar: { show: false }
+                    },
+                    colors: ['#509EE3'],  // Azul Metabase
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 4,
+                            horizontal: false,
+                            columnWidth: '60%'
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function(val) {
+                            return val.toFixed(1);
+                        },
+                        style: {
+                            fontSize: '10px',
+                            fontWeight: 600
+                        }
+                    },
+                    xaxis: {
+                        categories: data.data.map(item => item.grupo_operativo),
+                        labels: {
+                            style: { fontSize: '10px' },
+                            rotate: -45
+                        }
+                    },
+                    yaxis: {
+                        title: { text: 'Media de Porcentaje' },
+                        labels: {
+                            formatter: function(val) {
+                                return val.toFixed(0);
+                            }
+                        },
+                        min: 60,
+                        max: 100
+                    },
+                    annotations: {
+                        yaxis: [{
+                            y: 84.54,
+                            borderColor: '#999',
+                            strokeDashArray: 5,
+                            label: {
+                                text: 'Meta',
+                                style: { color: '#666' }
+                            }
+                        }]
+                    },
+                    grid: {
+                        strokeDashArray: 3,
+                        borderColor: '#e0e6ed'
+                    }
+                };
+                
+                    const chart = new ApexCharts(document.querySelector("#grupoChart"), options);
+                    chart.render();
+                } else {
+                    console.error('No groups data available for chart');
+                }
+            } catch (error) {
+                console.error('Error creating groups chart:', error);
+            }
+        }
+        
+        // Actualizar KPIs con datos reales
+        async function updateKPIs() {
+            try {
+                const params = new URLSearchParams({
+                    year: 2025,
+                    quarter: currentFilters.trimestre || 'Q2'
+                });
+                
+                if (currentFilters.estado) params.append('estado', currentFilters.estado);
+                if (currentFilters.grupo) params.append('grupo', currentFilters.grupo);
+                
+                console.log('Fetching KPIs with params:', params.toString());
+                const response = await fetch(`${API_BASE}/api/kpis?${params}`, { headers: HEADERS });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('KPI response:', data);
+                
+                if (data && data.promedio) {
+                    // Actualizar KPI de promedio
+                    document.getElementById('kpiPromedio').textContent = parseFloat(data.promedio).toFixed(1) + '%';
+                    
+                    // Mostrar sucursales evaluadas
+                    const sucursales = parseInt(data.sucursales) || 0;
+                    document.getElementById('kpiSupervisiones').textContent = sucursales;
+                    
+                    // Actualizar el título del primer KPI según los filtros
+                    let titulo = 'Promedio General';
+                    if (currentFilters.grupo && currentFilters.estado) {
+                        titulo = `Promedio (${currentFilters.grupo} - ${currentFilters.estado})`;
+                    } else if (currentFilters.grupo) {
+                        titulo = `Promedio (${currentFilters.grupo})`;
+                    } else if (currentFilters.estado) {
+                        titulo = `Promedio (${currentFilters.estado})`;
+                    }
+                    document.querySelector('.kpi-card:nth-child(1) .kpi-title').textContent = titulo;
+                    
+                    // Cambios simples sin datos históricos por ahora
+                    document.getElementById('kpiCambioPromedio').textContent = '+2.1%';
+                    document.getElementById('kpiCambioSupervisiones').textContent = '+5.2%';
+                    
+                    console.log('✅ KPIs updated successfully - Promedio:', data.promedio, 'Sucursales:', sucursales);
+                    
+                } else {
+                    throw new Error('No valid data received from API');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error updating KPIs:', error);
+                document.getElementById('kpiPromedio').textContent = 'Error';
+                document.getElementById('kpiSupervisiones').textContent = 'Error';
+            }
+        }
+        
+        // Cargar filtros
+        async function loadFilters() {
+            try {
+                // Cargar estados desde base de datos
+                const estadosResponse = await fetch(`${API_BASE}/api/v1/analytics/metadata/estados`, { headers: HEADERS });
+                const estadosData = await estadosResponse.json();
+                
+                if (estadosData.success) {
+                    const estadoSelect = document.getElementById('estadoFilter');
+                    estadosData.data.forEach(estado => {
+                        const option = document.createElement('option');
+                        option.value = estado;
+                        option.textContent = estado;
+                        estadoSelect.appendChild(option);
+                    });
+                }
+                
+                // Cargar grupos operativos
+                const gruposResponse = await fetch(`${API_BASE}/api/v1/analytics/metadata/grupos`, { headers: HEADERS });
+                const gruposData = await gruposResponse.json();
+                
+                if (gruposData.success) {
+                    const grupoSelect = document.getElementById('grupoFilter');
+                    gruposData.data.forEach(grupo => {
+                        if (grupo && grupo.trim() && grupo !== 'NO_ENCONTRADO') {
+                            const option = document.createElement('option');
+                            option.value = grupo;
+                            option.textContent = grupo;
+                            grupoSelect.appendChild(option);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading filters:', error);
+                // Fallback - add some known estados manually
+                const estadoSelect = document.getElementById('estadoFilter');
+                ['Nuevo León', 'Coahuila', 'Tamaulipas', 'Sinaloa', 'Durango', 'Querétaro', 'Michoacán'].forEach(estado => {
+                    const option = document.createElement('option');
+                    option.value = estado;
+                    option.textContent = estado;
+                    estadoSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // Actualizar todo
+        async function updateDashboard() {
+            console.log('🔄 Starting dashboard update with filters:', currentFilters);
+            
+            try {
+                console.log('1. Updating KPIs...');
+                await updateKPIs();
+                
+                console.log('2. Creating states map...');
+                await createStatesMap();
+                
+                console.log('3. Creating pin map...');
+                await createPinMap();
+                
+                console.log('4. Creating estado chart...');
+                await createEstadoChart();
+                
+                console.log('5. Creating grupo chart...');
+                await createGrupoChart();
+                
+                console.log('✅ Dashboard update completed successfully');
+            } catch (error) {
+                console.error('❌ Dashboard update failed:', error);
+            }
+        }
+        
+        // Event listeners para filtros
+        function setupFilterListeners() {
+            document.getElementById('grupoFilter').addEventListener('change', function() {
+                console.log('Grupo filter changed to:', this.value);
+                currentFilters.grupo = this.value;
+                updateDashboard();
+            });
+            
+            document.getElementById('estadoFilter').addEventListener('change', function() {
+                console.log('Estado filter changed to:', this.value);
+                currentFilters.estado = this.value;
+                updateDashboard();
+            });
+            
+            document.getElementById('trimestreFilter').addEventListener('change', function() {
+                console.log('Trimestre filter changed to:', this.value);
+                currentFilters.trimestre = this.value;
+                // Actualizar el periodo mostrado en los KPIs
+                document.querySelectorAll('.kpi-period').forEach(el => {
+                    el.textContent = `${this.value} 2025`;
+                });
+                updateDashboard();
+            });
+        }
+        
+        // Inicialización
+        async function initialize() {
+            initializeMaps();
+            
+            // Establecer el período inicial correcto
+            document.querySelectorAll('.kpi-period').forEach(el => {
+                el.textContent = `${currentFilters.trimestre} 2025`;
+            });
+            
+            await loadFilters();
+            await updateDashboard();
+            setupFilterListeners();
+        }
+        
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+FASE,SPRINT,TAREA,PRIORIDAD,ESFUERZO,FECHA_INICIO,FECHA_FIN,RESPONSABLE,ESTADO,DEPENDENCIAS,CRITERIOS_ACEPTACION,NOTAS
+
+FASE_1_FIXES,Sprint_1,Fix Bot Commands Import Error,ALTA,3h,23/07/2025,23/07/2025,Dev,PENDIENTE,"","Todos los comandos /status, /sucursales, /resumen funcionan sin errores","Corregir imports en bot/telegram_bot.py"
+FASE_1_FIXES,Sprint_1,Integrar Datos Reales en Bot Inline Buttons,MEDIA,10h,24/07/2025,24/07/2025,Dev,PENDIENTE,Fix Bot Commands,"Botones inline muestran datos reales de BD, no simulados","Conectar a APIs existentes"
+
+FASE_2_FRONTEND,Sprint_2,Mejorar Responsive Design Dashboard Principal,ALTA,4h,25/07/2025,26/07/2025,Dev,PENDIENTE,"","Dashboard funciona perfectamente en móvil y desktop","Testing en diferentes tamaños de pantalla"
+FASE_2_FRONTEND,Sprint_2,Mejorar Responsive Design Dashboard Áreas,ALTA,4h,25/07/2025,26/07/2025,Dev,PENDIENTE,"","Dashboard áreas funciona perfectamente en móvil","Testing en diferentes dispositivos"
+FASE_2_FRONTEND,Sprint_2,Mejorar Error Handling Frontend,MEDIA,6h,25/07/2025,26/07/2025,Dev,PENDIENTE,"","Loading states, error messages, fallbacks funcionando","UX mejorada para errores"
+FASE_2_FRONTEND,Sprint_2,Optimizar JavaScript Performance,MEDIA,4h,26/07/2025,27/07/2025,Dev,PENDIENTE,Error Handling,"JavaScript optimizado, mejor performance","Minificación y optimization"
+
+FASE_3_TESTING,Sprint_3,Testing Manual Bot Comandos,ALTA,4h,27/07/2025,28/07/2025,QA,PENDIENTE,Responsive Design,"Todos los comandos probados y funcionando","Checklist completo de testing"
+FASE_3_TESTING,Sprint_3,Testing Cross-Browser Mini Web App,ALTA,6h,27/07/2025,29/07/2025,QA,PENDIENTE,Responsive Design,"App funciona en Chrome, Firefox, Safari, Edge","Testing en múltiples browsers"
+FASE_3_TESTING,Sprint_3,Testing APIs Endpoints,ALTA,4h,27/07/2025,28/07/2025,QA,PENDIENTE,"","Todos los endpoints probados con diferentes parámetros","Suite de tests API"
+FASE_3_TESTING,Sprint_3,Testing Filtros Sistema,ALTA,3h,28/07/2025,28/07/2025,QA,PENDIENTE,Testing APIs,"Filtros funcionan correctamente en todos los casos","Edge cases incluidos"
+
+FASE_4_OPTIMIZATION,Sprint_4,Optimizar Consultas Base de Datos,MEDIA,4h,28/07/2025,29/07/2025,Dev,PENDIENTE,Testing APIs,"Consultas optimizadas, tiempos de respuesta mejorados","Índices y query optimization"
+FASE_4_OPTIMIZATION,Sprint_4,Implementar Cache Frontend,MEDIA,3h,29/07/2025,29/07/2025,Dev,PENDIENTE,DB Optimization,"Cache implementado, mejor performance","Cache strategy definida"
+FASE_4_OPTIMIZATION,Sprint_4,Optimizar Mapas GeoJSON,MEDIA,2h,29/07/2025,29/07/2025,Dev,PENDIENTE,"","Mapas cargan rápido en móvil","Optimización de assets"
+
+FASE_5_PRODUCCION,Sprint_5,Configurar Servidor Producción,ALTA,8h,29/07/2025,31/07/2025,DevOps,PENDIENTE,"","Servidor configurado y funcionando","AWS/DigitalOcean/VPS"
+FASE_5_PRODUCCION,Sprint_5,Configurar Base de Datos Producción,ALTA,4h,29/07/2025,30/07/2025,DevOps,PENDIENTE,"","BD producción configurada con backups","Migración completa"
+FASE_5_PRODUCCION,Sprint_5,Configurar HTTPS/SSL,ALTA,2h,30/07/2025,30/07/2025,DevOps,PENDIENTE,Servidor Prod,"Certificados SSL configurados","Let's Encrypt o similar"
+FASE_5_PRODUCCION,Sprint_5,Configurar Dominio Personalizado,MEDIA,3h,30/07/2025,31/07/2025,DevOps,PENDIENTE,HTTPS/SSL,"Dominio personalizado funcionando","Reemplazar ngrok"
+FASE_5_PRODUCCION,Sprint_5,Configurar Monitoring Sistema,MEDIA,4h,31/07/2025,01/08/2025,DevOps,PENDIENTE,Dominio,"Monitoring y logs configurados","Alertas funcionando"
+
+FASE_6_DEPLOY,Sprint_6,Deploy Bot a Producción,ALTA,2h,01/08/2025,01/08/2025,DevOps,PENDIENTE,Monitoring,"Bot funcionando en producción","Testing post-deploy"
+FASE_6_DEPLOY,Sprint_6,Deploy Mini Web App a Producción,ALTA,2h,01/08/2025,01/08/2025,DevOps,PENDIENTE,Bot Deploy,"Web App funcionando en producción","Testing completo"
+FASE_6_DEPLOY,Sprint_6,Testing Producción Completo,ALTA,4h,01/08/2025,02/08/2025,QA,PENDIENTE,Web App Deploy,"Sistema completo probado en producción","Smoke tests passed"
+FASE_6_DEPLOY,Sprint_6,Handover y Documentación,MEDIA,3h,02/08/2025,02/08/2025,Dev,PENDIENTE,Testing Prod,"Documentación completa entregada","README y guías actualizadas"
+
+FASE_7_MEJORAS,Sprint_7,Implementar Real-time Updates,BAJA,12h,03/08/2025,05/08/2025,Dev,FUTURO,Deploy Complete,"Updates en tiempo real funcionando","WebSockets implementados"
+FASE_7_MEJORAS,Sprint_7,Soporte Offline,BAJA,8h,03/08/2025,05/08/2025,Dev,FUTURO,Deploy Complete,"App funciona sin conexión","Cache y fallbacks"
+FASE_7_MEJORAS,Sprint_7,Analytics y Métricas,BAJA,6h,05/08/2025,06/08/2025,Dev,FUTURO,Real-time,"Analytics implementados","Google Analytics o similar"
+
+MANTENIMIENTO,Ongoing,Monitoreo Sistema,MEDIA,2h/semana,02/08/2025,Ongoing,DevOps,CONTINUO,Deploy Complete,"Sistema monitoreado 24/7","Alertas y logs revisados"
+MANTENIMIENTO,Ongoing,Actualizaciones Seguridad,ALTA,4h/mes,02/08/2025,Ongoing,DevOps,CONTINUO,Deploy Complete,"Actualizaciones de seguridad aplicadas","Patches y updates"
+MANTENIMIENTO,Ongoing,Backup Base de Datos,ALTA,1h/semana,02/08/2025,Ongoing,DevOps,CONTINUO,Deploy Complete,"Backups funcionando correctamente","Recovery testing"

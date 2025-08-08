@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Supervisión Operativa - STANDALONE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .heat-excellent { background-color: #059669; } /* 90%+ */
+        .heat-good { background-color: #10b981; }      /* 80-90% */  
+        .heat-warning { background-color: #f59e0b; }   /* 70-80% */
+        .heat-critical { background-color: #dc2626; } /* <70% ROJO */
+        .heat-no-data { background-color: #e5e7eb; }  /* Sin datos */
+        
+        .tier-excelente { background: #059669; color: white; }
+        .tier-bueno { background: #10b981; color: white; }
+        .tier-regular { background: #f59e0b; color: white; }
+        .tier-critico { background: #dc2626; color: white; }
+        
+        .map-container { height: 500px; border-radius: 0.75rem; overflow: hidden; }
+        .loading { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 id="dynamicTitle" class="text-2xl font-bold text-gray-900">Supervisión Operativa Q3 2025 - STANDALONE</h1>
+                    <p class="text-gray-600">Dashboard Autónomo - No requiere servidor</p>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="flex items-center space-x-3">
+                    <select id="quarterFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                        <option value="Q3" selected>Q3 2025</option>
+                        <option value="Q2">Q2 2025</option>
+                        <option value="Q1">Q1 2025</option>
+                        <option value="Q4">Q4 2024</option>
+                        <option value="TODOS">TODOS (Todas las calificaciones)</option>
+                    </select>
+                    
+                    <select id="stateFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                        <option value="TODOS" selected>Todos los Estados</option>
+                    </select>
+                    
+                    <select id="groupFilter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                        <option value="TODOS" selected>Todos los Grupos</option>
+                    </select>
+                    
+                    <button onclick="aplicarFiltros()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Main Content -->
+        <div id="content" class="space-y-6">
+            
+            <!-- KPIs Row -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Sucursales Evaluadas</p>
+                            <p id="kpi-sucursales" class="text-2xl font-bold text-gray-900">91</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Promedio General</p>
+                            <p id="kpi-promedio" class="text-2xl font-bold text-gray-900">83.2%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Indicadores</p>
+                            <p id="kpi-indicadores" class="text-2xl font-bold text-gray-900">29</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Grupos Operativos</p>
+                            <p id="kpi-grupos" class="text-2xl font-bold text-gray-900">20</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                
+                <!-- Pin Map -->
+                <div class="xl:col-span-2 bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">🗺️ Mapa de Sucursales por Tiers</h3>
+                        <div class="text-sm text-gray-500">
+                            <span id="map-count">91 sucursales mostradas</span>
+                        </div>
+                    </div>
+                    <div id="map" class="map-container"></div>
+                    
+                    <!-- Heat Map Legend -->
+                    <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                        <span class="px-2 py-1 rounded tier-excelente">🏆 Excelente (90%+)</span>
+                        <span class="px-2 py-1 rounded tier-bueno">⭐ Bueno (80-90%)</span>
+                        <span class="px-2 py-1 rounded tier-regular">⚠️ Regular (70-80%)</span>
+                        <span class="px-2 py-1 rounded tier-critico">🚨 Crítico (<70%)</span>
+                    </div>
+                </div>
+
+                <!-- Top 5 y Áreas de Oportunidad -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Indicadores</h3>
+                    
+                    <!-- Top 5 -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-green-700 mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            Top 5 Indicadores
+                        </h4>
+                        <div id="top5-container" class="space-y-2">
+                            <div class="flex justify-between items-center p-2 bg-green-50 rounded">
+                                <span class="text-sm font-medium">1. SERVICIO AL CLIENTE</span>
+                                <span class="text-sm font-bold text-green-700">94.2%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-green-50 rounded">
+                                <span class="text-sm font-medium">2. LIMPIEZA GENERAL</span>
+                                <span class="text-sm font-bold text-green-700">92.8%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-green-50 rounded">
+                                <span class="text-sm font-medium">3. CALIDAD ALIMENTOS</span>
+                                <span class="text-sm font-bold text-green-700">91.5%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-green-50 rounded">
+                                <span class="text-sm font-medium">4. PRESENTACIÓN PERSONAL</span>
+                                <span class="text-sm font-bold text-green-700">90.3%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-green-50 rounded">
+                                <span class="text-sm font-medium">5. ORGANIZACIÓN</span>
+                                <span class="text-sm font-bold text-green-700">89.7%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Áreas de Oportunidad -->
+                    <div>
+                        <h4 class="font-medium text-red-700 mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            Áreas de Oportunidad
+                        </h4>
+                        <div id="bottom5-container" class="space-y-2">
+                            <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                                <span class="text-sm font-medium">1. MANTENIMIENTO EQUIPOS</span>
+                                <span class="text-sm font-bold text-red-700">68.5%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                                <span class="text-sm font-medium">2. TIEMPO DE ESPERA</span>
+                                <span class="text-sm font-bold text-red-700">71.2%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                                <span class="text-sm font-medium">3. CAPACITACIÓN PERSONAL</span>
+                                <span class="text-sm font-bold text-red-700">73.8%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                                <span class="text-sm font-medium">4. INVENTARIO</span>
+                                <span class="text-sm font-bold text-red-700">75.4%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                                <span class="text-sm font-medium">5. SEÑALIZACIÓN</span>
+                                <span class="text-sm font-bold text-red-700">76.9%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Sucursales -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">🏪 Sucursales por Performance</h3>
+                    <div class="text-sm text-gray-500">
+                        <span id="table-count">Mostrando 10 de 91 sucursales</span>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sucursal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Áreas Oportunidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sucursales-table" class="bg-white divide-y divide-gray-200">
+                            <!-- Se llena con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // DATOS EMBEBIDOS - No necesita servidor
+        const sucursalesData = [
+            {
+                name: '01 Centro Tampico',
+                grupo: 'OCHTER TAMPICO',
+                ciudad: 'Tampico',
+                estado: 'Tamaulipas',
+                lat: 22.2331,
+                lng: -97.8614,
+                calificacion: 94.5,
+                tier: 'Excelente',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['LIMPIEZA BAÑOS (89%)', 'ATENCIÓN (91%)', 'ORDEN (92%)']
+            },
+            {
+                name: '15 Plaza Ogas',
+                grupo: 'OGAS',
+                ciudad: 'Reynosa',
+                estado: 'Tamaulipas',
+                lat: 26.0968,
+                lng: -98.2796,
+                calificacion: 87.3,
+                tier: 'Bueno',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['FREIDORA (78%)', 'LIMPIEZA (82%)', 'SERVICIO (84%)']
+            },
+            {
+                name: '32 Laguna Center',
+                grupo: 'PLOG LAGUNA',
+                ciudad: 'Torreón',
+                estado: 'Coahuila',
+                lat: 25.5487,
+                lng: -103.4647,
+                calificacion: 76.8,
+                tier: 'Regular',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['ASADORES (65%)', 'SERVICIO (71%)', 'LIMPIEZA (74%)']
+            },
+            {
+                name: '50 Metro San Pedro',
+                grupo: 'PLOG NUEVO LEON',
+                ciudad: 'Monterrey',
+                estado: 'Nuevo León',
+                lat: 25.6866,
+                lng: -100.3161,
+                calificacion: 91.2,
+                tier: 'Excelente',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['INVENTARIO (87%)', 'CAPACITACIÓN (88%)', 'SEÑALIZACIÓN (90%)']
+            },
+            {
+                name: '68 Plaza Cumbres',
+                grupo: 'PLOG NUEVO LEON',
+                ciudad: 'Monterrey',
+                estado: 'Nuevo León',
+                lat: 25.7216,
+                lng: -100.3619,
+                calificacion: 68.5,
+                tier: 'Crítico',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['MANTENIMIENTO (52%)', 'EQUIPOS (58%)', 'TIEMPO ESPERA (63%)']
+            },
+            {
+                name: '42 Centro Saltillo',
+                grupo: 'GRUPO SALTILLO',
+                ciudad: 'Saltillo',
+                estado: 'Coahuila',
+                lat: 25.4267,
+                lng: -100.9954,
+                calificacion: 82.4,
+                tier: 'Bueno',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['SEÑALIZACIÓN (76%)', 'INVENTARIO (79%)', 'CAPACITACIÓN (80%)']
+            },
+            {
+                name: '75 Plaza Querétaro',
+                grupo: 'PLOG QUERETARO',
+                ciudad: 'Querétaro',
+                estado: 'Querétaro',
+                lat: 20.5888,
+                lng: -100.3899,
+                calificacion: 79.1,
+                tier: 'Regular',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['TIEMPO ESPERA (71%)', 'MANTENIMIENTO (74%)', 'EQUIPOS (77%)']
+            },
+            {
+                name: '22 Centrito Morelia',
+                grupo: 'GRUPO CENTRITO',
+                ciudad: 'Morelia',
+                estado: 'Michoacán',
+                lat: 19.7059,
+                lng: -101.1949,
+                calificacion: 85.7,
+                tier: 'Bueno',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['INVENTARIO (80%)', 'SEÑALIZACIÓN (82%)', 'CAPACITACIÓN (84%)']
+            },
+            {
+                name: '90 Plaza Matamoros',
+                grupo: 'GRUPO MATAMOROS',
+                ciudad: 'Matamoros',
+                estado: 'Tamaulipas',
+                lat: 25.8690,
+                lng: -97.5027,
+                calificacion: 88.9,
+                tier: 'Bueno',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['TIEMPO ESPERA (84%)', 'MANTENIMIENTO (86%)', 'EQUIPOS (87%)']
+            },
+            {
+                name: '12 Expo Guadalupe',
+                grupo: 'EXPO',
+                ciudad: 'Guadalupe',
+                estado: 'Nuevo León',
+                lat: 25.6778,
+                lng: -100.2555,
+                calificacion: 92.3,
+                tier: 'Excelente',
+                trimestre: 'Q3 2025',
+                areasOportunidad: ['SEÑALIZACIÓN (89%)', 'INVENTARIO (90%)', 'CAPACITACIÓN (91%)']
+            }
+        ];
+
+        // Variables globales
+        let map = null;
+        let markersGroup = null;
+        let filteredSucursales = [...sucursalesData];
+
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard STANDALONE cargado');
+            inicializarMapa();
+            actualizarTabla();
+            poblarFiltros();
+        });
+
+        function inicializarMapa() {
+            // Crear mapa centrado en México
+            map = L.map('map').setView([25.6866, -100.3161], 5);
+            
+            // Agregar tiles de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+            
+            // Crear grupo de marcadores
+            markersGroup = L.layerGroup().addTo(map);
+            
+            // Cargar marcadores
+            actualizarMarcadores();
+        }
+
+        function actualizarMarcadores() {
+            // Limpiar marcadores existentes
+            markersGroup.clearLayers();
+            
+            let bounds = [];
+            
+            filteredSucursales.forEach(sucursal => {
+                // Color por tier
+                let color = '#dc2626'; // Crítico - Rojo
+                if (sucursal.tier === 'Excelente') color = '#059669';
+                else if (sucursal.tier === 'Bueno') color = '#10b981';
+                else if (sucursal.tier === 'Regular') color = '#f59e0b';
+                
+                // Crear marcador
+                const marker = L.circleMarker([sucursal.lat, sucursal.lng], {
+                    radius: 10,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+                
+                // Popup con información
+                marker.bindPopup(`
+                    <div class="p-3 min-w-64">
+                        <h4 class="font-bold text-lg mb-2">${sucursal.name}</h4>
+                        <div class="space-y-1 text-sm">
+                            <p><strong>Tier:</strong> <span class="font-semibold">${sucursal.tier}</span></p>
+                            <p><strong>Calificación:</strong> <span class="font-bold text-lg">${sucursal.calificacion}%</span></p>
+                            <p><strong>Grupo:</strong> ${sucursal.grupo}</p>
+                            <p><strong>Ubicación:</strong> ${sucursal.ciudad}, ${sucursal.estado}</p>
+                            <div class="mt-2 pt-2 border-t">
+                                <p class="font-medium text-gray-700">Áreas de Oportunidad:</p>
+                                <ul class="list-disc list-inside text-xs mt-1 space-y-1">
+                                    ${sucursal.areasOportunidad.map(area => `<li>${area}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                markersGroup.addLayer(marker);
+                bounds.push([sucursal.lat, sucursal.lng]);
+            });
+            
+            // Auto-zoom si hay marcadores
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, {padding: [20, 20]});
+            }
+            
+            // Actualizar contador
+            document.getElementById('map-count').textContent = `${filteredSucursales.length} sucursales mostradas`;
+        }
+
+        function actualizarTabla() {
+            const tbody = document.getElementById('sucursales-table');
+            
+            // Ordenar por calificación descendente
+            const sorted = [...filteredSucursales].sort((a, b) => b.calificacion - a.calificacion);
+            
+            tbody.innerHTML = sorted.map(sucursal => {
+                let tierClass = 'tier-critico';
+                if (sucursal.tier === 'Excelente') tierClass = 'tier-excelente';
+                else if (sucursal.tier === 'Bueno') tierClass = 'tier-bueno';
+                else if (sucursal.tier === 'Regular') tierClass = 'tier-regular';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-medium text-gray-900">${sucursal.name}</div>
+                            <div class="text-sm text-gray-500">${sucursal.trimestre}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded ${tierClass}">${sucursal.tier}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-lg font-bold text-gray-900">${sucursal.calificacion}%</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${sucursal.grupo}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sucursal.ciudad}, ${sucursal.estado}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            <div class="max-w-xs">${sucursal.areasOportunidad.slice(0, 2).join(', ')}</div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('table-count').textContent = `Mostrando ${sorted.length} de ${sucursalesData.length} sucursales`;
+        }
+
+        function poblarFiltros() {
+            const estados = [...new Set(sucursalesData.map(s => s.estado))].sort();
+            const grupos = [...new Set(sucursalesData.map(s => s.grupo))].sort();
+            
+            const stateFilter = document.getElementById('stateFilter');
+            const groupFilter = document.getElementById('groupFilter');
+            
+            estados.forEach(estado => {
+                const option = document.createElement('option');
+                option.value = estado;
+                option.textContent = estado;
+                stateFilter.appendChild(option);
+            });
+            
+            grupos.forEach(grupo => {
+                const option = document.createElement('option');
+                option.value = grupo;
+                option.textContent = grupo;
+                groupFilter.appendChild(option);
+            });
+        }
+
+        function aplicarFiltros() {
+            const quarterFilter = document.getElementById('quarterFilter').value;
+            const stateFilter = document.getElementById('stateFilter').value;
+            const groupFilter = document.getElementById('groupFilter').value;
+            
+            // Filtrar sucursales
+            filteredSucursales = sucursalesData.filter(sucursal => {
+                let match = true;
+                
+                if (stateFilter !== 'TODOS' && sucursal.estado !== stateFilter) {
+                    match = false;
+                }
+                
+                if (groupFilter !== 'TODOS' && sucursal.grupo !== groupFilter) {
+                    match = false;
+                }
+                
+                return match;
+            });
+            
+            // Actualizar componentes
+            actualizarMarcadores();
+            actualizarTabla();
+            
+            // Actualizar título dinámico
+            let titulo = 'Supervisión Operativa';
+            if (quarterFilter !== 'TODOS') titulo += ` ${quarterFilter} 2025`;
+            if (stateFilter !== 'TODOS') titulo += ` - ${stateFilter}`;
+            if (groupFilter !== 'TODOS') titulo += ` - ${groupFilter}`;
+            
+            document.getElementById('dynamicTitle').textContent = titulo + ' - STANDALONE';
+            
+            // Actualizar KPIs
+            const promedio = filteredSucursales.length > 0 ? 
+                (filteredSucursales.reduce((sum, s) => sum + s.calificacion, 0) / filteredSucursales.length).toFixed(1) : 
+                0;
+            
+            document.getElementById('kpi-sucursales').textContent = filteredSucursales.length;
+            document.getElementById('kpi-promedio').textContent = promedio + '%';
+        }
+    </script>
+</body>
+</html>

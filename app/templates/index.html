@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics de Supervisión Operativa</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/miniapp.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Analytics de Supervisión Operativa</h1>
+            <div id="connection-status" class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Conectando...</span>
+            </div>
+        </header>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <h3>🔍 Filtros</h3>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="sucursal-filter">Sucursal:</label>
+                    <select id="sucursal-filter" class="filter-select">
+                        <option value="">Todas las sucursales</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="grupo-filter">Grupo Operativo:</label>
+                    <select id="grupo-filter" class="filter-select">
+                        <option value="">Todos los grupos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="area-filter">Área de Evaluación:</label>
+                    <select id="area-filter" class="filter-select">
+                        <option value="">Todas las áreas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="fecha-inicio">Fecha Inicio:</label>
+                    <input type="date" id="fecha-inicio" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <label for="fecha-fin">Fecha Fin:</label>
+                    <input type="date" id="fecha-fin" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <button id="apply-filters" class="btn btn-primary">Aplicar Filtros</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Total Sucursales</h3>
+                <p class="metric" id="total-sucursales">-</p>
+                <span class="subtitle">En evaluación</span>
+            </div>
+            <div class="card">
+                <h3>Promedio General</h3>
+                <p class="metric" id="promedio-general">-</p>
+                <span class="subtitle">Calificación</span>
+            </div>
+            <div class="card">
+                <h3>Total Evaluaciones</h3>
+                <p class="metric" id="total-evaluaciones">-</p>
+                <span class="subtitle">Registradas</span>
+            </div>
+            <div class="card">
+                <h3>Mejor Sucursal</h3>
+                <p class="metric" id="mejor-sucursal">-</p>
+                <span class="subtitle" id="mejor-sucursal-score">-</span>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>📈 Rendimiento por Sucursal</h3>
+                <canvas id="sucursalChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>🏢 Rendimiento por Grupo Operativo</h3>
+                <canvas id="grupoChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>📋 Rendimiento por Área</h3>
+                <canvas id="areaChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>📅 Tendencias Temporales</h3>
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="data-section">
+            <div class="data-header">
+                <h3>📋 Datos Detallados</h3>
+                <div class="data-controls">
+                    <button id="export-csv" class="btn btn-secondary">📊 Exportar CSV</button>
+                    <button id="export-json" class="btn btn-secondary">📄 Exportar JSON</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Sucursal</th>
+                            <th>Grupo</th>
+                            <th>Área</th>
+                            <th>Calificación</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="refresh-btn" class="btn btn-primary">🔄 Actualizar Datos</button>
+            <select id="time-range" class="select">
+                <option value="7">Últimos 7 días</option>
+                <option value="30" selected>Últimos 30 días</option>
+                <option value="90">Últimos 90 días</option>
+                <option value="365">Último año</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Error</h3>
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/miniapp.js') }}"></script>
+</body>
+</html>

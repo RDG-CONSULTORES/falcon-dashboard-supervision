@@ -1,0 +1,264 @@
+/* ApexCharts Custom Styles - Dashboard Telegram Mini App */
+
+/* Override ApexCharts default styles para que coincidan con el tema del dashboard */
+.apexcharts-canvas {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    background: transparent !important;
+    margin: 0 auto !important;
+    display: block !important;
+    max-width: 100% !important;
+}
+
+/* Mejoras específicas para Telegram Mini App */
+.chart-container .apexcharts-canvas {
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+/* Telegram theme integration */
+.apexcharts-canvas svg {
+    background: var(--telegram-bg, #ffffff) !important;
+}
+
+/* Tooltip modernizado */
+.apexcharts-tooltip {
+    background: rgba(0, 0, 0, 0.9) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.apexcharts-tooltip-title {
+    background: none !important;
+    border: none !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+    margin-bottom: 4px !important;
+    padding: 4px 8px !important;
+}
+
+.apexcharts-tooltip-series-group {
+    padding: 4px 8px !important;
+}
+
+.apexcharts-tooltip-text-y-label {
+    font-size: 12px !important;
+    color: #ccc !important;
+}
+
+.apexcharts-tooltip-text-y-value {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+    margin-left: 4px !important;
+}
+
+/* Leyenda mejorada */
+.apexcharts-legend {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.apexcharts-legend-text {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #666 !important;
+}
+
+/* Ejes mejorados */
+.apexcharts-xaxis-label,
+.apexcharts-yaxis-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    fill: #666 !important;
+}
+
+.apexcharts-xaxis-title-text,
+.apexcharts-yaxis-title-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    fill: #333 !important;
+}
+
+/* Grilla mejorada */
+.apexcharts-gridlines-horizontal line,
+.apexcharts-gridlines-vertical line {
+    stroke: #f1f1f1 !important;
+    stroke-dasharray: 3 !important;
+    stroke-width: 1 !important;
+}
+
+/* Data labels mejorados */
+.apexcharts-datalabel-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.apexcharts-datalabel-value {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Toolbar mejorado (cuando esté habilitado) */
+.apexcharts-toolbar {
+    background: #fff !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.apexcharts-menu-icon,
+.apexcharts-zoom-icon,
+.apexcharts-reset-icon,
+.apexcharts-selection-icon,
+.apexcharts-pan-icon {
+    fill: #666 !important;
+    transition: fill 0.2s ease !important;
+}
+
+.apexcharts-menu-icon:hover,
+.apexcharts-zoom-icon:hover,
+.apexcharts-reset-icon:hover,
+.apexcharts-selection-icon:hover,
+.apexcharts-pan-icon:hover {
+    fill: #333 !important;
+}
+
+/* Contenedores de gráficos mejorados */
+.chart-container .apexcharts-canvas {
+    background: transparent !important;
+}
+
+/* Animaciones suaves para hover */
+.apexcharts-bar-area {
+    transition: all 0.2s ease !important;
+}
+
+.apexcharts-bar-area:hover {
+    filter: brightness(1.1) !important;
+}
+
+/* Estados de los gráficos */
+.apexcharts-canvas.apexcharts-element-hidden {
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .apexcharts-xaxis-label {
+        font-size: 10px !important;
+    }
+    
+    .apexcharts-yaxis-label {
+        font-size: 10px !important;
+    }
+    
+    .apexcharts-datalabel-label,
+    .apexcharts-datalabel-value {
+        font-size: 10px !important;
+    }
+    
+    .apexcharts-tooltip {
+        font-size: 11px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .apexcharts-xaxis-label {
+        font-size: 9px !important;
+    }
+    
+    .apexcharts-yaxis-label {
+        font-size: 9px !important;
+    }
+    
+    .apexcharts-datalabel-label,
+    .apexcharts-datalabel-value {
+        font-size: 9px !important;
+    }
+}
+
+/* Mejoras específicas para el tema del dashboard */
+.chart-container {
+    position: relative;
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Loading state para ApexCharts */
+.apexcharts-canvas[data-apex-rendered="false"] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.apexcharts-canvas[data-apex-rendered="false"]::after {
+    content: 'Cargando...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    color: #666;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 16px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar para contenedores cuando sea necesario */
+.chart-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.chart-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.chart-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.chart-container::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Estilos específicos para dark mode (si aplica) */
+@media (prefers-color-scheme: dark) {
+    .apexcharts-xaxis-label,
+    .apexcharts-yaxis-label {
+        fill: #aaa !important;
+    }
+    
+    .apexcharts-xaxis-title-text,
+    .apexcharts-yaxis-title-text {
+        fill: #ccc !important;
+    }
+    
+    .apexcharts-gridlines-horizontal line,
+    .apexcharts-gridlines-vertical line {
+        stroke: #404040 !important;
+    }
+    
+    .apexcharts-legend-text {
+        color: #aaa !important;
+    }
+}

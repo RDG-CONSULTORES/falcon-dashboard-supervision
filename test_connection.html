@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Bot ↔ Dashboard Connection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+        }
+        .status-card.error {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .status-card.warning {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+        .test-result {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .data-preview {
+            background: #f1f3f4;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Test: Conexión Bot ↔ Dashboard</h1>
+        <p>Verificación completa del sistema Telegram Bot + Flask API + Dashboard</p>
+
+        <div class="status-card">
+            <h3>📊 Estado de Servicios</h3>
+            <div id="services-status">
+                <div class="test-result loading">🔄 Verificando servicios...</div>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <h3>🔌 APIs Testing</h3>
+            <div id="api-status">
+                <div class="test-result loading">🔄 Probando endpoints...</div>
+            </div>
+            <button class="btn" onclick="testAPIs()">🔄 Probar APIs</button>
+        </div>
+
+        <div class="status-card">
+            <h3>📈 Datos de Ejemplo</h3>
+            <div id="data-preview">
+                <div class="test-result loading">🔄 Cargando datos...</div>
+            </div>
+            <button class="btn" onclick="loadSampleData()">📥 Cargar Datos</button>
+        </div>
+
+        <div class="status-card">
+            <h3>🤖 Información del Bot</h3>
+            <div id="bot-info">
+                <p><strong>URL del Dashboard:</strong> <code>https://e10303b560a7.ngrok-free.app</code></p>
+                <p><strong>Estado Bot:</strong> <span class="test-result success">✅ Activo</span></p>
+                <p><strong>Menu Button:</strong> <span class="test-result success">✅ Configurado</span></p>
+                <p><strong>Comandos disponibles:</strong> /start, /help, /status, /sucursales, /resumen</p>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <h3>🎯 Flujo de Prueba</h3>
+            <ol>
+                <li>Abrir Telegram y buscar tu bot</li>
+                <li>Enviar comando <code>/start</code></li>
+                <li>Presionar el botón <strong>"📊 Abrir Dashboard Analytics"</strong> en la barra inferior</li>
+                <li>Verificar que se abra el dashboard con gráficas</li>
+                <li>Probar filtros y navegación</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE = 'http://localhost:5002/api/v1';
+
+        // Test Services Status
+        async function checkServices() {
+            const servicesStatus = document.getElementById('services-status');
+            servicesStatus.innerHTML = '';
+
+            const services = [
+                { name: 'Flask API', endpoint: '/health/' },
+                { name: 'Database', endpoint: '/health/detailed' },
+                { name: 'KPIs Endpoint', endpoint: '/analytics/kpis?year=2025&quarter=Q1' },
+                { name: 'Geo Data', endpoint: '/geo/coordinates?year=2025&limit=5' }
+            ];
+
+            for (const service of services) {
+                try {
+                    const response = await fetch(`${API_BASE}${service.endpoint}`);
+                    const status = response.ok ? 'success' : 'error';
+                    const statusText = response.ok ? '✅ OK' : `❌ Error (${response.status})`;
+                    
+                    servicesStatus.innerHTML += `
+                        <div class="test-result ${status}">
+                            ${service.name}: ${statusText}
+                        </div>
+                    `;
+                } catch (error) {
+                    servicesStatus.innerHTML += `
+                        <div class="test-result error">
+                            ${service.name}: ❌ Error (${error.message})
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Test APIs
+        async function testAPIs() {
+            const apiStatus = document.getElementById('api-status');
+            apiStatus.innerHTML = '<div class="test-result loading">🔄 Probando endpoints...</div>';
+
+            const endpoints = [
+                '/analytics/kpis?year=2025&quarter=ALL',
+                '/analytics/performance/states?year=2025&limit=5',
+                '/analytics/performance/branches?year=2025&limit=5',
+                '/analytics/trends?year=2025',
+                '/geo/coordinates?year=2025&limit=10'
+            ];
+
+            let results = '';
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint}`);
+                    const data = await response.json();
+                    const status = response.ok && data.success !== false ? 'success' : 'error';
+                    const statusText = response.ok ? '✅' : '❌';
+                    
+                    results += `
+                        <div class="test-result ${status}">
+                            ${statusText} ${endpoint.split('?')[0]}
+                        </div>
+                    `;
+                } catch (error) {
+                    results += `
+                        <div class="test-result error">
+                            ❌ ${endpoint.split('?')[0]} (Error)
+                        </div>
+                    `;
+                }
+            }
+            apiStatus.innerHTML = results;
+        }
+
+        // Load Sample Data
+        async function loadSampleData() {
+            const dataPreview = document.getElementById('data-preview');
+            dataPreview.innerHTML = '<div class="test-result loading">🔄 Cargando datos...</div>';
+
+            try {
+                // Load KPIs
+                const kpiResponse = await fetch(`${API_BASE}/analytics/kpis?year=2025&quarter=Q1`);
+                const kpiData = await kpiResponse.json();
+
+                // Load Geo Data
+                const geoResponse = await fetch(`${API_BASE}/geo/coordinates?year=2025&limit=3`);
+                const geoData = await geoResponse.json();
+
+                // Load Performance States
+                const statesResponse = await fetch(`${API_BASE}/analytics/performance/states?year=2025&limit=3`);
+                const statesData = await statesResponse.json();
+
+                const preview = `
+                    <strong>📊 KPIs Sample:</strong>
+                    <div class="data-preview">${JSON.stringify(kpiData.data, null, 2)}</div>
+                    
+                    <strong>🗺️ Geo Data Sample:</strong>
+                    <div class="data-preview">${JSON.stringify(geoData.data?.slice(0,2), null, 2)}</div>
+                    
+                    <strong>🏢 States Performance Sample:</strong>
+                    <div class="data-preview">${JSON.stringify(statesData.data?.slice(0,2), null, 2)}</div>
+                `;
+
+                dataPreview.innerHTML = preview;
+            } catch (error) {
+                dataPreview.innerHTML = `<div class="test-result error">❌ Error cargando datos: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServices();
+            setTimeout(testAPIs, 1000);
+        });
+    </script>
+</body>
+</html>

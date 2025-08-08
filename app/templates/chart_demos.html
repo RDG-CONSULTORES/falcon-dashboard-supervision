@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo de Controles Modernos de Gráficas y UI</title>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+    
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <!-- Highcharts -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- Leaflet para mapas -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Mapbox GL JS (alternativa moderna) -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    
+    <!-- Tailwind CSS para UI moderna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container-small {
+            position: relative;
+            height: 300px;
+        }
+        
+        .map-container {
+            position: relative;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .map-container-small {
+            position: relative;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* Estilos para mapas */
+        .leaflet-popup-content-wrapper {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .popup-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .popup-info {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .popup-score {
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 8px;
+            color: #3730a3;
+        }
+        
+        .demo-section {
+            scroll-margin-top: 80px;
+        }
+        
+        /* Animaciones suaves */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Estilos para D3.js */
+        .d3-tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        /* Navegación lateral */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar de navegación -->
+    <div class="sidebar p-6">
+        <h2 class="text-xl font-bold mb-6 text-gray-800">Bibliotecas de Gráficas</h2>
+        <nav class="space-y-2">
+            <a href="#chartjs" class="block py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700">Chart.js</a>
+            <a href="#apexcharts" class="block py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700">ApexCharts</a>
+            <a href="#echarts" class="block py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700">ECharts</a>
+            <a href="#highcharts" class="block py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700">Highcharts</a>
+            <a href="#d3js" class="block py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700">D3.js</a>
+            <a href="#maps" class="block py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700">Mapas Interactivos</a>
+            <a href="#ui-components" class="block py-2 px-3 rounded-lg hover:bg-gray-100 text-gray-700">Componentes UI</a>
+        </nav>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="max-w-7xl mx-auto">
+            <header class="mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Demo de Controles Modernos</h1>
+                <p class="text-lg text-gray-600">Comparación de bibliotecas modernas de gráficas para el Dashboard de Supervisión Operativa</p>
+            </header>
+            
+            <!-- Chart.js Demo -->
+            <section id="chartjs" class="demo-section mb-16 fade-in">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Chart.js</h2>
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-600">Ligera, simple y flexible. Perfecta para gráficas básicas con animaciones suaves.</p>
+                        <div class="flex gap-4 mt-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">✓ Gratis</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">8KB min</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Animaciones fluidas</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Gráfica de Barras</h3>
+                            <div class="chart-container-small">
+                                <canvas id="chartjs-bar"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Gráfica de Dona</h3>
+                            <div class="chart-container-small">
+                                <canvas id="chartjs-doughnut"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ApexCharts Demo -->
+            <section id="apexcharts" class="demo-section mb-16 fade-in">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">ApexCharts</h2>
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-600">Moderna y feature-rich. Excelente para dashboards interactivos con múltiples tipos de gráficas.</p>
+                        <div class="flex gap-4 mt-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">✓ Gratis</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">Responsive</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">30+ tipos</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Área con Gradiente</h3>
+                            <div id="apex-area" class="chart-container-small"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Radial Bar</h3>
+                            <div id="apex-radial" class="chart-container-small"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ECharts Demo -->
+            <section id="echarts" class="demo-section mb-16 fade-in">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Apache ECharts</h2>
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-600">Potente y versátil. Ideal para visualizaciones complejas y mapas interactivos.</p>
+                        <div class="flex gap-4 mt-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">✓ Gratis</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">Mapas incluidos</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Altamente customizable</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Gauge Moderno</h3>
+                            <div id="echarts-gauge" class="chart-container-small"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Heatmap</h3>
+                            <div id="echarts-heatmap" class="chart-container-small"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Highcharts Demo -->
+            <section id="highcharts" class="demo-section mb-16 fade-in">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Highcharts</h2>
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-600">Profesional y robusta. Excelente documentación y soporte empresarial.</p>
+                        <div class="flex gap-4 mt-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">Comercial</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">Export nativo</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Soporte premium</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Columnas 3D</h3>
+                            <div id="highcharts-3d" class="chart-container-small"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Polar Chart</h3>
+                            <div id="highcharts-polar" class="chart-container-small"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- D3.js Demo -->
+            <section id="d3js" class="demo-section mb-16 fade-in">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">D3.js</h2>
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-600">La más flexible y poderosa. Para visualizaciones únicas y completamente personalizadas.</p>
+                        <div class="flex gap-4 mt-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">✓ Gratis</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">100% flexible</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">Curva de aprendizaje</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Bubble Chart Interactivo</h3>
+                            <div id="d3-bubble" class="chart-container-small"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Sunburst</h3>
+                            <div id="d3-sunburst" class="chart-container-small"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Maps Demo -->
+            <section id="maps" class="demo-section mb-16 fade-in">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Mapas Interactivos</h2>
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-600">Ejemplos de mapas interactivos con pin points y coropletas para visualizar datos geográficos.</p>
+                        <div class="flex gap-4 mt-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">✓ Leaflet</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">Pin Points</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Coropletas</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-6">
+                        <!-- Mapa de Pin Points -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold mb-3">Mapa de Pin Points (Sucursales)</h3>
+                            <div id="pin-map" class="map-container"></div>
+                            <p class="text-sm text-gray-600 mt-2">Cada pin representa una sucursal con su calificación promedio</p>
+                        </div>
+                        
+                        <!-- Mapa Coroplético -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold mb-3">Mapa Coroplético (Estados de México)</h3>
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                <p class="text-sm text-blue-700">
+                                    <span class="font-semibold">✨ GeoJSON Real:</span> 
+                                    Usando el archivo mexico-angel-geojson-new.js con las divisiones exactas de los estados mexicanos
+                                </p>
+                            </div>
+                            <div id="choropleth-map" class="map-container"></div>
+                            <div class="flex items-center justify-center gap-4 mt-4 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded" style="background: #134e4a;"></div>
+                                    <span>96%+</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded" style="background: #059669;"></div>
+                                    <span>92-96%</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded" style="background: #10b981;"></div>
+                                    <span>88-92%</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded" style="background: #6ee7b7;"></div>
+                                    <span>85-88%</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded" style="background: #e5e7eb;"></div>
+                                    <span>Sin datos</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mapa Alternativo con Mapbox -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold mb-3">Alternativa: Mapbox GL (Moderna)</h3>
+                            <div id="mapbox-demo" class="map-container-small"></div>
+                            <p class="text-sm text-gray-600 mt-2">Mapas más modernos y fluidos (requiere API key gratuita)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- UI Components Demo -->
+            <section id="ui-components" class="demo-section mb-16 fade-in">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Componentes UI Modernos</h2>
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-600">Ejemplos de componentes UI modernos usando Tailwind CSS para el dashboard.</p>
+                    </div>
+                    
+                    <!-- KPI Cards -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-4">KPI Cards Modernas</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- KPI 1 -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 bg-blue-500 rounded-lg">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">+12.5%</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800">87.4%</h3>
+                                <p class="text-sm text-gray-600 mt-1">Promedio General</p>
+                            </div>
+                            
+                            <!-- KPI 2 -->
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 bg-green-500 rounded-lg">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">+8.2%</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800">1,234</h3>
+                                <p class="text-sm text-gray-600 mt-1">Sucursales Evaluadas</p>
+                            </div>
+                            
+                            <!-- KPI 3 -->
+                            <div class="bg-gradient-to-br from-purple-50 to-pink-100 p-6 rounded-xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 bg-purple-500 rounded-lg">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium text-red-600 bg-red-100 px-2 py-1 rounded">-2.1%</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800">28</h3>
+                                <p class="text-sm text-gray-600 mt-1">Estados Activos</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modern Filters -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Filtros Modernos</h3>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="relative">
+                                <select class="appearance-none bg-white border border-gray-300 rounded-lg py-3 px-4 pr-8 leading-tight focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                    <option>Q3 2025</option>
+                                    <option>Q2 2025</option>
+                                    <option>Q1 2025</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
+                            
+                            <button class="bg-white border border-gray-300 rounded-lg py-3 px-6 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                                    </svg>
+                                    Filtros
+                                </span>
+                            </button>
+                            
+                            <div class="flex bg-gray-100 rounded-lg p-1">
+                                <button class="bg-white rounded-md px-4 py-2 text-sm font-medium text-gray-700">Día</button>
+                                <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Semana</button>
+                                <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Mes</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bars -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Barras de Progreso</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700">Nuevo León</span>
+                                    <span class="text-sm font-medium text-gray-700">92%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700">Coahuila</span>
+                                    <span class="text-sm font-medium text-gray-700">87%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-green-500 to-green-600 h-2.5 rounded-full" style="width: 87%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700">Tamaulipas</span>
+                                    <span class="text-sm font-medium text-gray-700">78%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 h-2.5 rounded-full" style="width: 78%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Comparación Final -->
+            <section class="mb-16">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Comparación de Bibliotecas</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Biblioteca</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mejor para</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Licencia</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tamaño</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dificultad</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Chart.js</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Gráficas simples y limpias</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">MIT (Gratis)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~60KB</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Fácil</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">ApexCharts</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Dashboards interactivos</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">MIT (Gratis)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~430KB</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Media</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">ECharts</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Visualizaciones complejas</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apache (Gratis)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~800KB</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Media</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Highcharts</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Aplicaciones empresariales</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Comercial</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~200KB</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Fácil</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">D3.js</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Visualizaciones personalizadas</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">BSD (Gratis)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~280KB</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Difícil</td>
+                                </tr>
+                                <tr class="bg-green-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Leaflet</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mapas interactivos móviles</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">BSD (Gratis)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~40KB</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Fácil</td>
+                                </tr>
+                                <tr class="bg-blue-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Mapbox GL</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mapas vectoriales modernos</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Gratis* + Premium</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">~600KB</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Media</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- Tooltip para D3 -->
+    <div class="d3-tooltip"></div>
+    
+    <script>
+        // Datos de ejemplo basados en los dashboards de supervisión
+        const supervisionData = {
+            estados: ['Nuevo León', 'Coahuila', 'Tamaulipas', 'Sinaloa', 'Durango', 'Querétaro'],
+            valores: [92.3, 87.5, 85.2, 83.7, 81.9, 79.4],
+            colores: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
+        };
+        
+        // Chart.js - Bar Chart
+        const ctxBar = document.getElementById('chartjs-bar').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: supervisionData.estados,
+                datasets: [{
+                    label: 'Calificación Promedio',
+                    data: supervisionData.valores,
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+        
+        // Chart.js - Doughnut Chart
+        const ctxDoughnut = document.getElementById('chartjs-doughnut').getContext('2d');
+        new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Excelente', 'Bueno', 'Regular', 'Deficiente'],
+                datasets: [{
+                    data: [45, 30, 20, 5],
+                    backgroundColor: [
+                        '#10B981',
+                        '#3B82F6',
+                        '#F59E0B',
+                        '#EF4444'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // ApexCharts - Area Chart
+        const optionsArea = {
+            series: [{
+                name: 'Calificación',
+                data: [81, 84, 87, 85, 88, 90, 92]
+            }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: {
+                    show: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.2,
+                    stops: [0, 90, 100]
+                }
+            },
+            xaxis: {
+                categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],
+            },
+            yaxis: {
+                min: 70,
+                max: 100
+            },
+            colors: ['#3B82F6']
+        };
+        new ApexCharts(document.querySelector("#apex-area"), optionsArea).render();
+        
+        // ApexCharts - Radial Bar
+        const optionsRadial = {
+            series: [87.4],
+            chart: {
+                height: 300,
+                type: 'radialBar',
+            },
+            plotOptions: {
+                radialBar: {
+                    hollow: {
+                        size: '70%',
+                    },
+                    dataLabels: {
+                        name: {
+                            fontSize: '22px',
+                        },
+                        value: {
+                            fontSize: '36px',
+                            fontWeight: 'bold',
+                            color: '#333',
+                            formatter: function (val) {
+                                return val + '%';
+                            }
+                        },
+                        total: {
+                            show: true,
+                            label: 'Promedio',
+                            formatter: function (w) {
+                                return '87.4%';
+                            }
+                        }
+                    }
+                }
+            },
+            colors: ['#10B981'],
+            labels: ['Q3 2025'],
+        };
+        new ApexCharts(document.querySelector("#apex-radial"), optionsRadial).render();
+        
+        // ECharts - Gauge
+        const gaugeChart = echarts.init(document.getElementById('echarts-gauge'));
+        const gaugeOption = {
+            series: [
+                {
+                    type: 'gauge',
+                    startAngle: 180,
+                    endAngle: 0,
+                    min: 0,
+                    max: 100,
+                    pointer: {
+                        show: true,
+                        length: '80%',
+                        width: 8
+                    },
+                    progress: {
+                        show: true,
+                        overlap: false,
+                        width: 18,
+                        itemStyle: {
+                            color: '#3B82F6'
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            width: 18,
+                            color: [[1, '#E5E7EB']]
+                        }
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLabel: {
+                        show: true,
+                        distance: 25,
+                        color: '#999',
+                        fontSize: 12
+                    },
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}%',
+                        color: '#333',
+                        fontSize: 36,
+                        offsetCenter: [0, '70%']
+                    },
+                    data: [
+                        {
+                            value: 87.4,
+                            name: 'Calificación General'
+                        }
+                    ]
+                }
+            ]
+        };
+        gaugeChart.setOption(gaugeOption);
+        
+        // ECharts - Heatmap
+        const heatmapChart = echarts.init(document.getElementById('echarts-heatmap'));
+        const hours = ['12a', '3a', '6a', '9a', '12p', '3p', '6p', '9p'];
+        const days = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const heatmapData = [];
+        for (let i = 0; i < 7; i++) {
+            for (let j = 0; j < 8; j++) {
+                heatmapData.push([j, i, Math.floor(Math.random() * 100)]);
+            }
+        }
+        
+        const heatmapOption = {
+            tooltip: {
+                position: 'top'
+            },
+            grid: {
+                height: '80%',
+                top: '10%'
+            },
+            xAxis: {
+                type: 'category',
+                data: hours,
+                splitArea: {
+                    show: true
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: days,
+                splitArea: {
+                    show: true
+                }
+            },
+            visualMap: {
+                min: 0,
+                max: 100,
+                calculable: true,
+                orient: 'horizontal',
+                left: 'center',
+                bottom: '0%',
+                inRange: {
+                    color: ['#E5E7EB', '#3B82F6', '#1E40AF']
+                }
+            },
+            series: [{
+                name: 'Supervisiones',
+                type: 'heatmap',
+                data: heatmapData,
+                label: {
+                    show: false
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }]
+        };
+        heatmapChart.setOption(heatmapOption);
+        
+        // Highcharts - 3D Column (nota: necesita módulo 3D adicional)
+        Highcharts.chart('highcharts-3d', {
+            chart: {
+                type: 'column',
+                options3d: {
+                    enabled: false, // Cambiar a true si se carga el módulo 3D
+                    alpha: 15,
+                    beta: 15,
+                    depth: 50,
+                    viewDistance: 25
+                }
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: supervisionData.estados.slice(0, 4)
+            },
+            yAxis: {
+                title: {
+                    text: 'Calificación'
+                }
+            },
+            series: [{
+                name: 'Q3 2025',
+                data: supervisionData.valores.slice(0, 4),
+                color: '#8B5CF6'
+            }],
+            credits: {
+                enabled: false
+            }
+        });
+        
+        // Highcharts - Polar Chart
+        Highcharts.chart('highcharts-polar', {
+            chart: {
+                polar: true,
+                type: 'area'
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: ['Calidad', 'Servicio', 'Limpieza', 'Seguridad', 'Procesos', 'Personal'],
+                tickmarkPlacement: 'on',
+                lineWidth: 0
+            },
+            yAxis: {
+                gridLineInterpolation: 'polygon',
+                lineWidth: 0,
+                min: 0,
+                max: 100
+            },
+            series: [{
+                name: 'Actual',
+                data: [92, 88, 85, 90, 87, 91],
+                pointPlacement: 'on',
+                color: '#3B82F6',
+                fillOpacity: 0.3
+            }, {
+                name: 'Meta',
+                data: [95, 95, 95, 95, 95, 95],
+                pointPlacement: 'on',
+                color: '#EF4444',
+                fillOpacity: 0.1
+            }],
+            credits: {
+                enabled: false
+            }
+        });
+        
+        // D3.js - Bubble Chart
+        const bubbleData = supervisionData.estados.map((estado, i) => ({
+            name: estado,
+            value: supervisionData.valores[i],
+            size: Math.random() * 30 + 20
+        }));
+        
+        const bubbleSvg = d3.select("#d3-bubble")
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("viewBox", "0 0 400 300");
+        
+        const tooltip = d3.select(".d3-tooltip");
+        
+        const simulation = d3.forceSimulation(bubbleData)
+            .force("x", d3.forceX(200).strength(0.05))
+            .force("y", d3.forceY(150).strength(0.05))
+            .force("collide", d3.forceCollide(d => d.size + 2));
+        
+        const bubbles = bubbleSvg.selectAll("circle")
+            .data(bubbleData)
+            .enter().append("g");
+        
+        bubbles.append("circle")
+            .attr("r", d => d.size)
+            .attr("fill", (d, i) => supervisionData.colores[i])
+            .attr("opacity", 0.8)
+            .on("mouseover", function(event, d) {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(`${d.name}<br/>Calificación: ${d.value}%`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition().duration(500).style("opacity", 0);
+            });
+        
+        bubbles.append("text")
+            .text(d => d.value + "%")
+            .attr("text-anchor", "middle")
+            .attr("dy", ".3em")
+            .style("fill", "white")
+            .style("font-size", "12px")
+            .style("font-weight", "bold");
+        
+        simulation.on("tick", () => {
+            bubbles.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+        
+        // D3.js - Sunburst
+        const sunburstData = {
+            name: "Supervisión",
+            children: [
+                {
+                    name: "Norte",
+                    children: [
+                        { name: "Nuevo León", value: 92 },
+                        { name: "Coahuila", value: 87 },
+                        { name: "Tamaulipas", value: 85 }
+                    ]
+                },
+                {
+                    name: "Pacífico",
+                    children: [
+                        { name: "Sinaloa", value: 83 },
+                        { name: "Durango", value: 81 }
+                    ]
+                },
+                {
+                    name: "Centro",
+                    children: [
+                        { name: "Querétaro", value: 79 }
+                    ]
+                }
+            ]
+        };
+        
+        const sunburstWidth = 400;
+        const sunburstHeight = 300;
+        const radius = Math.min(sunburstWidth, sunburstHeight) / 2;
+        
+        const sunburstSvg = d3.select("#d3-sunburst")
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("viewBox", `0 0 ${sunburstWidth} ${sunburstHeight}`)
+            .append("g")
+            .attr("transform", `translate(${sunburstWidth / 2},${sunburstHeight / 2})`);
+        
+        const partition = d3.partition()
+            .size([2 * Math.PI, radius]);
+        
+        const root = d3.hierarchy(sunburstData)
+            .sum(d => d.value)
+            .sort((a, b) => b.value - a.value);
+        
+        partition(root);
+        
+        const arc = d3.arc()
+            .startAngle(d => d.x0)
+            .endAngle(d => d.x1)
+            .innerRadius(d => d.y0)
+            .outerRadius(d => d.y1);
+        
+        const color = d3.scaleOrdinal(supervisionData.colores);
+        
+        sunburstSvg.selectAll("path")
+            .data(root.descendants())
+            .enter().append("path")
+            .attr("d", arc)
+            .style("fill", d => color(d.data.name))
+            .style("stroke", "#fff")
+            .on("mouseover", function(event, d) {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(`${d.data.name}<br/>Valor: ${d.value || ''}`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition().duration(500).style("opacity", 0);
+            });
+        
+        // ================================
+        // MAPAS INTERACTIVOS
+        // ================================
+        
+        // Datos de ejemplo para sucursales (pin points)
+        const sucursalesData = [
+            { nombre: "EPL Monterrey Centro", lat: 25.6866, lng: -100.3161, calificacion: 94.2, ciudad: "Monterrey, NL" },
+            { nombre: "EPL Guadalupe", lat: 25.6722, lng: -100.2582, calificacion: 89.5, ciudad: "Guadalupe, NL" },
+            { nombre: "EPL San Nicolás", lat: 25.7287, lng: -100.2814, calificacion: 91.8, ciudad: "San Nicolás, NL" },
+            { nombre: "EPL Saltillo", lat: 25.4232, lng: -101.0053, calificacion: 87.3, ciudad: "Saltillo, COAH" },
+            { nombre: "EPL Torreón", lat: 25.5480, lng: -103.4068, calificacion: 85.7, ciudad: "Torreón, COAH" },
+            { nombre: "EPL Culiacán", lat: 24.7994, lng: -107.3731, calificacion: 88.9, ciudad: "Culiacán, SIN" },
+            { nombre: "EPL Mazatlán", lat: 23.2494, lng: -106.4103, calificacion: 90.1, ciudad: "Mazatlán, SIN" },
+            { nombre: "EPL Durango", lat: 24.0277, lng: -104.6532, calificacion: 86.4, ciudad: "Durango, DGO" },
+            { nombre: "EPL Querétaro", lat: 20.5888, lng: -100.3899, calificacion: 92.6, ciudad: "Querétaro, QRO" },
+            { nombre: "EPL Morelia", lat: 19.7010, lng: -101.1846, calificacion: 83.5, ciudad: "Morelia, MICH" }
+        ];
+        
+        // Datos de ejemplo para estados (coropletas) - Usando nombres exactos del GeoJSON
+        const estadosData = {
+            'Nuevo León': 91.5,
+            'Coahuila': 86.4,
+            'Sinaloa': 89.5,
+            'Durango': 86.4,
+            'Querétaro': 92.6,
+            'Michoacán': 83.5,
+            'Tamaulipas': 84.2,
+            'Jalisco': 87.8,
+            'Zacatecas': 85.9,
+            'Yucatán': 88.3,
+            'Veracruz': 82.7,
+            'Tlaxcala': 90.1,
+            'Sonora': 89.8,
+            'San Luis Potosí': 87.2,
+            'Puebla': 84.6,
+            'Oaxaca': 81.9,
+            'México': 86.7,
+            'Guerrero': 79.4,
+            'Guanajuato': 88.5,
+            'Chihuahua': 87.1,
+            'Chiapas': 78.8,
+            'Baja California': 91.2,
+            'Aguascalientes': 93.4
+        };
+        
+        // Función para obtener color según calificación
+        function getColorByScore(score) {
+            if (score >= 96) return '#134e4a'; // Verde muy oscuro
+            if (score >= 92) return '#059669'; // Verde oscuro
+            if (score >= 88) return '#10b981'; // Verde medio
+            if (score >= 85) return '#6ee7b7'; // Verde claro
+            return '#e5e7eb'; // Gris para sin datos
+        }
+        
+        // Crear icon personalizado para pins
+        function createCustomIcon(score) {
+            const color = getColorByScore(score);
+            const svgIcon = `
+                <svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="shadow-${score}">
+                            <feDropShadow dx="2" dy="3" stdDeviation="2" flood-opacity="0.3"/>
+                        </filter>
+                    </defs>
+                    <path d="M15 40C15 40 30 25 30 15C30 6.7 23.3 0 15 0C6.7 0 0 6.7 0 15C0 25 15 40 15 40Z" 
+                          fill="${color}" 
+                          stroke="#FFFFFF" 
+                          stroke-width="3" 
+                          filter="url(#shadow-${score})"/>
+                    <circle cx="15" cy="15" r="10" fill="rgba(255,255,255,0.95)" stroke="${color}" stroke-width="2"/>
+                    <text x="15" y="19" text-anchor="middle" fill="${color}" font-family="Inter" font-size="10" font-weight="700">
+                        ${Math.round(score)}
+                    </text>
+                </svg>
+            `;
+            
+            return L.divIcon({
+                html: svgIcon,
+                className: 'custom-pin-marker',
+                iconSize: [30, 40],
+                iconAnchor: [15, 40],
+                popupAnchor: [0, -45]
+            });
+        }
+        
+        // Inicializar mapa de pin points
+        function initPinMap() {
+            const pinMap = L.map('pin-map', {
+                center: [24.5, -102],
+                zoom: 5.5,
+                zoomControl: true
+            });
+            
+            // Agregar tiles con estilo moderno
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(pinMap);
+            
+            // Agregar marcadores
+            sucursalesData.forEach(sucursal => {
+                const icon = createCustomIcon(sucursal.calificacion);
+                
+                const popupContent = `
+                    <div class="popup-title">${sucursal.nombre}</div>
+                    <div class="popup-info">📍 ${sucursal.ciudad}</div>
+                    <div class="popup-score">Calificación: ${sucursal.calificacion}%</div>
+                `;
+                
+                L.marker([sucursal.lat, sucursal.lng], { icon })
+                    .bindPopup(popupContent)
+                    .addTo(pinMap);
+            });
+        }
+        
+        // Variable para almacenar el GeoJSON de México
+        let mexicoGeoJSON = null;
+        
+        // Cargar GeoJSON real de México (AngelInmara)
+        async function loadMexicoGeoJSON() {
+            try {
+                const response = await fetch('/static/js/mexico-angel-geojson-new.js');
+                const geoJsonData = await response.json();
+                mexicoGeoJSON = geoJsonData;
+                console.log('✅ GeoJSON de México cargado correctamente');
+                return geoJsonData;
+            } catch (error) {
+                console.error('❌ Error cargando GeoJSON:', error);
+                // Fallback con datos básicos si falla la carga
+                return {
+                    "type": "FeatureCollection",
+                    "features": []
+                };
+            }
+        }
+        
+        // Inicializar mapa coroplético con GeoJSON real
+        async function initChoroplethMap() {
+            const choroplethMap = L.map('choropleth-map', {
+                center: [23.6345, -102.5528],
+                zoom: 5.2,
+                zoomControl: true
+            });
+            
+            // Agregar tiles con estilo moderno
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(choroplethMap);
+            
+            // Cargar y usar el GeoJSON real
+            const geoJsonData = await loadMexicoGeoJSON();
+            
+            if (geoJsonData && geoJsonData.features && geoJsonData.features.length > 0) {
+                console.log(`📍 Cargando ${geoJsonData.features.length} estados de México`);
+                
+                // Agregar capa GeoJSON con estilos
+                L.geoJSON(geoJsonData, {
+                    style: function(feature) {
+                        // Usar diferentes propiedades según la estructura del GeoJSON
+                        const estadoName = feature.properties.name || feature.properties.NAME || feature.properties.estado;
+                        const score = estadosData[estadoName] || 0;
+                        
+                        return {
+                            fillColor: getColorByScore(score),
+                            weight: 1.5,
+                            opacity: 1,
+                            color: '#ffffff',
+                            fillOpacity: score > 0 ? 0.8 : 0.3
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        // Usar diferentes propiedades según la estructura del GeoJSON
+                        const estadoName = feature.properties.name || feature.properties.NAME || feature.properties.estado;
+                        const score = estadosData[estadoName];
+                        
+                        const popupContent = `
+                            <div class="popup-title">${estadoName}</div>
+                            <div class="popup-info">📊 Calificación Promedio</div>
+                            <div class="popup-score">${score ? score + '%' : 'Sin datos'}</div>
+                        `;
+                        layer.bindPopup(popupContent);
+                        
+                        // Efectos hover
+                        layer.on('mouseover', function() {
+                            this.setStyle({
+                                weight: 3,
+                                fillOpacity: score > 0 ? 0.9 : 0.5
+                            });
+                        });
+                        
+                        layer.on('mouseout', function() {
+                            this.setStyle({
+                                weight: 1.5,
+                                fillOpacity: score > 0 ? 0.8 : 0.3
+                            });
+                        });
+                    }
+                }).addTo(choroplethMap);
+            } else {
+                console.error('❌ No se pudo cargar el GeoJSON de México');
+                // Mostrar mensaje de error en el mapa
+                const errorDiv = L.divIcon({
+                    html: '<div style="background: rgba(239,68,68,0.1); padding: 20px; border-radius: 8px; text-align: center; color: #dc2626;">Error: No se pudo cargar el mapa de México</div>',
+                    className: 'error-message',
+                    iconSize: [300, 60]
+                });
+                L.marker([23.6345, -102.5528], {icon: errorDiv}).addTo(choroplethMap);
+            }
+        }
+        
+        // Inicializar demo de Mapbox (sin API key, solo muestra el concepto)
+        function initMapboxDemo() {
+            const mapboxContainer = document.getElementById('mapbox-demo');
+            mapboxContainer.innerHTML = `
+                <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg">
+                    <div class="text-center p-8">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Mapbox GL JS</h4>
+                        <p class="text-gray-600 text-sm mb-4">Mapas vectoriales modernos con animaciones fluidas</p>
+                        <div class="text-xs text-gray-500">
+                            <p>✓ Vectoriales y escalables</p>
+                            <p>✓ Animaciones 60fps</p>
+                            <p>✓ Estilos completamente personalizables</p>
+                            <p class="mt-2 text-blue-600">Requiere API key gratuita de Mapbox</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Inicializar todos los mapas cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pequeño delay para asegurar que los contenedores estén renderizados
+            setTimeout(() => {
+                initPinMap();
+                initChoroplethMap();
+                initMapboxDemo();
+            }, 100);
+        });
+        
+        // Responsive
+        window.addEventListener('resize', () => {
+            gaugeChart.resize();
+            heatmapChart.resize();
+        });
+    </script>
+</body>
+</html>

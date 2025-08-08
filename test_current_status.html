@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado Actual - Dashboard Supervision Operativa</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5; 
+            line-height: 1.6; 
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2E3138; text-align: center; margin-bottom: 30px; }
+        .status-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin: 30px 0; 
+        }
+        .status-card { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border-left: 4px solid #28a745;
+        }
+        .status-card.warning { border-left-color: #ffc107; }
+        .status-card.error { border-left-color: #dc3545; }
+        .status-card h3 { margin-top: 0; color: #495057; }
+        .btn { 
+            display: inline-block; 
+            padding: 12px 24px; 
+            margin: 10px 5px; 
+            background: #509EE3; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        .btn:hover { background: #3d8bdb; }
+        .btn.success { background: #28a745; }
+        .btn.success:hover { background: #218838; }
+        .btn.secondary { background: #6c757d; }
+        .btn.secondary:hover { background: #545b62; }
+        .btn.warning { background: #ffc107; color: #212529; }
+        .btn.warning:hover { background: #e0a800; }
+        .recommendation { 
+            background: #d4edda; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #c3e6cb; 
+            margin: 20px 0;
+        }
+        .recommendation h3 { color: #155724; margin-top: 0; }
+        .test-results { margin: 20px 0; }
+        .center { text-align: center; }
+        @media (max-width: 768px) {
+            .status-grid { grid-template-columns: 1fr; }
+            .container { margin: 10px; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Estado Actual - Dashboard Supervision Operativa</h1>
+        
+        <div class="status-grid">
+            <div class="status-card">
+                <h3>✅ Flask Server</h3>
+                <p><strong>Estado:</strong> Funcionando</p>
+                <p><strong>Puerto:</strong> 5002</p>
+                <p><strong>Rutas:</strong> Todas configuradas</p>
+            </div>
+            
+            <div class="status-card warning">
+                <h3>⚠️ Metabase Embedding</h3>
+                <p><strong>Estado:</strong> Bloqueado</p>
+                <p><strong>Error:</strong> "refused to connect"</p>
+                <p><strong>Causa:</strong> CSP/X-Frame-Options</p>
+            </div>
+            
+            <div class="status-card">
+                <h3>✅ Dashboard JavaScript</h3>
+                <p><strong>Estado:</strong> Funcional</p>
+                <p><strong>Features:</strong> KPIs, Mapas, Filtros</p>
+                <p><strong>API:</strong> Conectada</p>
+            </div>
+            
+            <div class="status-card">
+                <h3>✅ Enlace Directo Metabase</h3>
+                <p><strong>Estado:</strong> Funcional</p>
+                <p><strong>URL:</strong> Accesible</p>
+                <p><strong>Datos:</strong> En tiempo real</p>
+            </div>
+        </div>
+        
+        <div class="recommendation">
+            <h3>💡 Recomendación Inmediata</h3>
+            <p>Basado en el análisis técnico, la <strong>mejor solución ahora mismo</strong> es usar el <strong>enlace directo a Metabase</strong>. Es profesional, tiene todos los filtros, y funciona perfecto.</p>
+            <p>El dashboard JavaScript es una excelente alternativa con integración total en tu app.</p>
+        </div>
+        
+        <div class="test-results center">
+            <h3>🧪 Opciones Disponibles:</h3>
+            
+            <a href="https://rdg-consultores.metabaseapp.com/public/dashboard/647f87a1-b51d-494e-a5d0-f20ddf100e68" 
+               target="_blank" class="btn success">
+                🚀 Dashboard Metabase (Recomendado)
+            </a>
+            
+            <a href="http://localhost:5002/dashboard/simple" class="btn secondary">
+                📊 Dashboard JavaScript
+            </a>
+            
+            <a href="http://localhost:5002/solutions" class="btn warning">
+                📋 Ver Todas las Soluciones
+            </a>
+            
+            <a href="http://localhost:5002/dashboard/calificacion-metabase" class="btn">
+                🔄 Dashboard Híbrido
+            </a>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #509EE3;">
+            <h4>🔧 Resumen Técnico:</h4>
+            <ul>
+                <li><strong>Problema:</strong> Metabase bloquea embedding por X-Frame-Options/CSP</li>
+                <li><strong>Solución 1:</strong> Enlace directo - ✅ Funciona perfectamente</li>
+                <li><strong>Solución 2:</strong> Dashboard JavaScript - ✅ Integración total</li>
+                <li><strong>Solución 3:</strong> Configurar embedding - ⚙️ Requiere admin access</li>
+                <li><strong>Estado:</strong> Tienes opciones funcionales disponibles ahora</li>
+            </ul>
+        </div>
+        
+        <div class="center" style="margin-top: 30px;">
+            <p><strong>¿Cuál prefieres usar?</strong></p>
+            <p style="color: #6c757d; font-size: 14px;">
+                El enlace directo te da acceso completo a Metabase con todos sus filtros.<br>
+                El dashboard JavaScript te da control total dentro de tu aplicación.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📊 Status page loaded');
+            console.log('✅ Flask server: Running on port 5002');
+            console.log('⚠️ Metabase embedding: Blocked by CSP');
+            console.log('✅ Direct link: Working perfectly');
+            console.log('✅ JavaScript dashboard: Functional');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nuevo León",
+        "promedio": 91.48,
+        "sucursales": 42
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-101.5, 25.5], [-99.5, 25.5], [-99.5, 27.5], [-101.5, 27.5], [-101.5, 25.5]]]
+      }
+    },
+    {
+      "type": "Feature", 
+      "properties": {
+        "name": "Tamaulipas",
+        "promedio": 84.56,
+        "sucursales": 19
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-99.5, 22.0], [-97.0, 22.0], [-97.0, 27.0], [-99.5, 27.0], [-99.5, 22.0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Coahuila",
+        "promedio": 84.49,
+        "sucursales": 8
+      },
+      "geometry": {
+        "type": "Polygon", 
+        "coordinates": [[[-103.5, 25.0], [-100.0, 25.0], [-100.0, 29.0], [-103.5, 29.0], [-103.5, 25.0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Querétaro", 
+        "promedio": 96.97,
+        "sucursales": 4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-100.5, 20.0], [-99.5, 20.0], [-99.5, 21.5], [-100.5, 21.5], [-100.5, 20.0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Durango",
+        "promedio": 90.06,
+        "sucursales": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-106.0, 23.0], [-103.0, 23.0], [-103.0, 26.5], [-106.0, 26.5], [-106.0, 23.0]]]
+      }
+    }
+  ]
+}

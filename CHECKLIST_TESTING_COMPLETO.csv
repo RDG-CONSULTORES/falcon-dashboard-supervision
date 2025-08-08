@@ -1,0 +1,75 @@
+CATEGORIA,ITEM,DESCRIPCION,CRITERIO_ACEPTACION,PRIORIDAD,ESTADO,RESPONSABLE,FECHA_TEST,NOTAS,RESULTADO
+
+BOT_COMANDOS,/start,Comando de inicio funciona,Bot responde con mensaje de bienvenida y teclado,ALTA,PENDIENTE,QA,,"Probar desde cero con usuario nuevo",""
+BOT_COMANDOS,/help,Comando de ayuda funciona,Bot muestra lista completa de comandos,MEDIA,PENDIENTE,QA,,"Verificar que todos los comandos estén listados",""
+BOT_COMANDOS,/status,Comando de estado funciona,Bot muestra estado del sistema sin errores,ALTA,PENDIENTE,QA,,"Debe mostrar BD conectada y timestamp",""
+BOT_COMANDOS,/sucursales,Lista de sucursales funciona,Bot muestra lista de sucursales de la BD,MEDIA,PENDIENTE,QA,,"Verificar que coincida con datos reales",""
+BOT_COMANDOS,/resumen,Resumen estadístico funciona,Bot muestra estadísticas y botón dashboard,MEDIA,PENDIENTE,QA,,"Verificar datos correctos y botón funcional",""
+
+BOT_TECLADO,Botón Indicadores por Áreas,Botón del teclado funciona,Abre menú de indicadores con botones inline,ALTA,PENDIENTE,QA,,"Verificar todos los botones inline",""
+BOT_TECLADO,Botón Ayuda,Botón de ayuda funciona,Mismo comportamiento que /help,BAJA,PENDIENTE,QA,,"Comparar con comando /help",""
+BOT_TECLADO,Botón Estado,Botón de estado funciona,Mismo comportamiento que /status,MEDIA,PENDIENTE,QA,,"Comparar con comando /status",""
+
+BOT_INLINE,Botón Ventas,Botón inline de ventas,Muestra métricas reales de ventas (no simuladas),MEDIA,PENDIENTE,QA,,"Verificar datos reales de BD",""
+BOT_INLINE,Botón Operaciones,Botón inline operaciones,Muestra métricas reales de operaciones,MEDIA,PENDIENTE,QA,,"Verificar datos reales de BD",""
+BOT_INLINE,Botón Servicio Cliente,Botón inline servicio,Muestra métricas reales de servicio,MEDIA,PENDIENTE,QA,,"Verificar datos reales de BD",""
+BOT_INLINE,Botón Inventarios,Botón inline inventarios,Muestra métricas reales de inventarios,MEDIA,PENDIENTE,QA,,"Verificar datos reales de BD",""
+BOT_INLINE,Botón RRHH,Botón inline RRHH,Muestra métricas reales de recursos humanos,MEDIA,PENDIENTE,QA,,"Verificar datos reales de BD",""
+BOT_INLINE,Dashboard Detallado,WebApp button áreas,Abre dashboard de áreas correctamente,ALTA,PENDIENTE,QA,,"Verificar apertura sin errores",""
+BOT_INLINE,Dashboard Principal,WebApp button principal,Abre dashboard principal correctamente,ALTA,PENDIENTE,QA,,"Verificar apertura sin errores",""
+
+BOT_MENU,Menu Button,Botón persistente inferior,Abre dashboard desde cualquier momento,ALTA,PENDIENTE,QA,,"Probar desde diferentes estados del chat",""
+
+WEBAPP_PRINCIPAL,Carga Inicial,Dashboard principal carga,Página carga sin errores en menos de 5 segundos,ALTA,PENDIENTE,QA,,"Probar en diferentes navegadores",""
+WEBAPP_PRINCIPAL,KPIs Principales,KPIs se muestran,Todos los KPIs principales muestran datos correctos,ALTA,PENDIENTE,QA,,"Verificar cálculos contra BD",""
+WEBAPP_PRINCIPAL,Mapa México,Mapa interactivo funciona,Mapa de México se renderiza correctamente,ALTA,PENDIENTE,QA,,"Probar zoom y hover",""
+WEBAPP_PRINCIPAL,Gráficos Performance,Gráficos se renderizan,Todos los gráficos cargan con datos reales,ALTA,PENDIENTE,QA,,"Verificar diferentes tipos de gráficos",""
+WEBAPP_PRINCIPAL,Filtros Trimestre,Filtro por trimestre,Filtro Q1/Q2/Q3/Q4/ALL funciona correctamente,ALTA,PENDIENTE,QA,,"Probar todos los valores",""
+WEBAPP_PRINCIPAL,Filtros Estado,Filtro por estado,Filtro por estado filtra datos correctamente,ALTA,PENDIENTE,QA,,"Probar con diferentes estados",""
+WEBAPP_PRINCIPAL,Filtros Grupo,Filtro por grupo operativo,Filtro por grupo funciona correctamente,ALTA,PENDIENTE,QA,,"Probar con diferentes grupos",""
+WEBAPP_PRINCIPAL,Combinación Filtros,Múltiples filtros activos,Combinación de filtros funciona correctamente,ALTA,PENDIENTE,QA,,"Probar diferentes combinaciones",""
+
+WEBAPP_AREAS,Carga Áreas,Dashboard áreas carga,Página de áreas carga sin errores,ALTA,PENDIENTE,QA,,"Verificar tiempo de carga",""
+WEBAPP_AREAS,Lista 29 Áreas,29 áreas de supervisión,Se muestran las 29 áreas de supervisión,ALTA,PENDIENTE,QA,,"Contar áreas mostradas",""
+WEBAPP_AREAS,Datos Reales Áreas,Datos de áreas son reales,Todas las áreas muestran datos reales de BD,ALTA,PENDIENTE,QA,,"Verificar contra BD",""
+WEBAPP_AREAS,Filtros Áreas,Filtros en página áreas,Filtros funcionan en dashboard de áreas,MEDIA,PENDIENTE,QA,,"Probar filtros específicos",""
+WEBAPP_AREAS,Gráficos Áreas,Gráficos por área,Gráficos específicos por área funcionan,MEDIA,PENDIENTE,QA,,"Verificar visualizaciones",""
+
+API_ENDPOINTS,Health Endpoint,/api/health,Endpoint responde con status correcto,ALTA,PENDIENTE,QA,,"curl -s /api/health",""
+API_ENDPOINTS,Summary Endpoint,/api/summary,Endpoint responde con datos estadísticos,ALTA,PENDIENTE,QA,,"Verificar estructura JSON",""
+API_ENDPOINTS,Sucursales Endpoint,/api/sucursales,Lista todas las sucursales,MEDIA,PENDIENTE,QA,,"Verificar cantidad correcta",""
+API_ENDPOINTS,Grupos Endpoint,/api/grupos,Lista todos los grupos operativos,MEDIA,PENDIENTE,QA,,"Verificar cantidad correcta",""
+API_ENDPOINTS,Performance Sucursal,/api/performance/sucursal,Performance por sucursal con filtros,ALTA,PENDIENTE,QA,,"Probar con diferentes filtros",""
+API_ENDPOINTS,Performance Grupo,/api/performance/grupo,Performance por grupo con filtros,ALTA,PENDIENTE,QA,,"Probar con diferentes filtros",""
+API_ENDPOINTS,Areas Supervision,/api/areas/supervision,Datos de áreas de supervisión,ALTA,PENDIENTE,QA,,"Verificar 29 áreas",""
+API_ENDPOINTS,Metadata Estados,/api/metadata/estados,Lista estados para filtros,MEDIA,PENDIENTE,QA,,"Verificar estados disponibles",""
+API_ENDPOINTS,Metadata Grupos,/api/metadata/grupos,Lista grupos para filtros,MEDIA,PENDIENTE,QA,,"Verificar grupos disponibles",""
+
+RESPONSIVE_MOBILE,Mobile iPhone,Dashboard en iPhone,Dashboard funciona correctamente en iPhone,ALTA,PENDIENTE,QA,,"Probar diferentes modelos iPhone",""
+RESPONSIVE_MOBILE,Mobile Android,Dashboard en Android,Dashboard funciona correctamente en Android,ALTA,PENDIENTE,QA,,"Probar diferentes modelos Android",""
+RESPONSIVE_MOBILE,Tablet Portrait,Tablet modo vertical,Dashboard se adapta a tablet vertical,MEDIA,PENDIENTE,QA,,"iPad y tablets Android",""
+RESPONSIVE_MOBILE,Tablet Landscape,Tablet modo horizontal,Dashboard se adapta a tablet horizontal,MEDIA,PENDIENTE,QA,,"Verificar layout horizontal",""
+
+RESPONSIVE_DESKTOP,Desktop Chrome,Chrome escritorio,Dashboard funciona en Chrome desktop,ALTA,PENDIENTE,QA,,"Versión más reciente Chrome",""
+RESPONSIVE_DESKTOP,Desktop Firefox,Firefox escritorio,Dashboard funciona en Firefox desktop,ALTA,PENDIENTE,QA,,"Versión más reciente Firefox",""
+RESPONSIVE_DESKTOP,Desktop Safari,Safari escritorio,Dashboard funciona en Safari desktop,MEDIA,PENDIENTE,QA,,"Solo si disponible macOS",""
+RESPONSIVE_DESKTOP,Desktop Edge,Edge escritorio,Dashboard funciona en Edge desktop,MEDIA,PENDIENTE,QA,,"Microsoft Edge",""
+
+PERFORMANCE,Load Time Initial,Tiempo carga inicial,Dashboard carga en menos de 5 segundos,ALTA,PENDIENTE,QA,,"Medir tiempo con herramientas dev",""
+PERFORMANCE,Load Time Filtered,Tiempo con filtros,Filtros aplican en menos de 3 segundos,ALTA,PENDIENTE,QA,,"Medir tiempo de respuesta filtros",""
+PERFORMANCE,Memory Usage,Uso de memoria,Uso de memoria razonable en navegador,MEDIA,PENDIENTE,QA,,"Verificar memory leaks",""
+PERFORMANCE,Network Usage,Uso de red,Transferencia de datos optimizada,MEDIA,PENDIENTE,QA,,"Verificar tamaño de payloads",""
+
+ERROR_HANDLING,API Down,APIs no disponibles,Manejo correcto cuando API no responde,MEDIA,PENDIENTE,QA,,"Simular APIs down",""
+ERROR_HANDLING,Network Error,Sin conexión internet,Manejo correcto sin conexión,MEDIA,PENDIENTE,QA,,"Desconectar internet y probar",""
+ERROR_HANDLING,Invalid Data,Datos inválidos,Manejo correcto con datos corruptos,BAJA,PENDIENTE,QA,,"Simular datos inválidos",""
+ERROR_HANDLING,Empty Results,Resultados vacíos,Manejo correcto con resultados vacíos,MEDIA,PENDIENTE,QA,,"Probar filtros que no devuelven datos",""
+
+SECURITY,HTTPS,Conexión segura,Todas las conexiones son HTTPS,ALTA,PENDIENTE,QA,,"Verificar certificados SSL",""
+SECURITY,Data Validation,Validación de datos,Inputs validados correctamente,MEDIA,PENDIENTE,QA,,"Probar inyección SQL, XSS",""
+SECURITY,Bot Token,Token seguro,Token del bot no expuesto,ALTA,PENDIENTE,QA,,"Verificar no hay leaks de token",""
+
+USABILITY,Navigation,Navegación intuitiva,Usuario puede navegar fácilmente,MEDIA,PENDIENTE,QA,,"Testing con usuario real",""
+USABILITY,Error Messages,Mensajes de error,Mensajes de error son claros y útiles,MEDIA,PENDIENTE,QA,,"Verificar UX de errores",""
+USABILITY,Loading States,Estados de carga,Loading states informativos,MEDIA,PENDIENTE,QA,,"Verificar spinners y mensajes",""
+USABILITY,Help Context,Ayuda contextual,Usuario entiende cómo usar la app,BAJA,PENDIENTE,QA,,"Testing de usabilidad",""

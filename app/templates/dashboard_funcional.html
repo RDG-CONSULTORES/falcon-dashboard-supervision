@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Supervisión Operativa - FUNCIONAL</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Leaflet MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .tier-1 { background-color: #059669; color: white; }
+        .tier-2 { background-color: #10b981; color: white; }
+        .tier-3 { background-color: #f59e0b; color: white; }
+        .tier-4 { background-color: #dc2626; color: white; }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .tier-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <div class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="py-6">
+                    <h1 class="text-3xl font-bold text-gray-900">🚀 Supervisión Operativa</h1>
+                    <p class="text-gray-600 mt-2">Dashboard funcional con datos reales y sistema de tiers</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Loading State -->
+            <div id="loading" class="text-center py-8">
+                <div class="loading mx-auto mb-4"></div>
+                <p class="text-gray-600">Cargando datos del dashboard...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="text-red-400">⚠️</span>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Error cargando datos</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p id="error-message">No se pudieron cargar los datos del servidor.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div id="content" class="hidden space-y-8">
+
+                <!-- KPIs Row -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6" id="kpis-container">
+                    <!-- KPIs will be populated by JavaScript -->
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">🔍 Filtros</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <select id="filter-tier" class="border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Todos los Tiers</option>
+                            <option value="Tier 1">Tier 1 - Excelente (90%+)</option>
+                            <option value="Tier 2">Tier 2 - Bueno (80-90%)</option>
+                            <option value="Tier 3">Tier 3 - Regular (70-80%)</option>
+                            <option value="Tier 4">Tier 4 - Crítico (<70%)</option>
+                        </select>
+                        
+                        <select id="filter-estado" class="border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Todos los Estados</option>
+                        </select>
+                        
+                        <select id="filter-grupo" class="border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Todos los Grupos</option>
+                        </select>
+                        
+                        <button onclick="applyFilters()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
+                            Aplicar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    <!-- Map -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">🗺️ Mapa de Sucursales por Tiers</h3>
+                        <div id="map" class="map-container"></div>
+                        <div class="mt-4 text-sm text-gray-600">
+                            <div class="flex flex-wrap gap-2">
+                                <span class="tier-badge tier-1">🟢 Tier 1 (90%+)</span>
+                                <span class="tier-badge tier-2">🟡 Tier 2 (80-90%)</span>
+                                <span class="tier-badge tier-3">🟠 Tier 3 (70-80%)</span>
+                                <span class="tier-badge tier-4">🔴 Tier 4 (<70%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top/Bottom Indicators -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">📊 Indicadores Top 5 y Áreas de Oportunidad</h3>
+                        <div class="space-y-4">
+                            
+                            <!-- Top 5 -->
+                            <div>
+                                <h4 class="text-md font-medium text-green-700 mb-2">🏆 Top 5 Indicadores</h4>
+                                <div id="top-indicators" class="space-y-1">
+                                    <!-- Populated by JavaScript -->
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom 5 -->
+                            <div>
+                                <h4 class="text-md font-medium text-red-700 mb-2">🎯 Áreas de Oportunidad</h4>
+                                <div id="bottom-indicators" class="space-y-1">
+                                    <!-- Populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sucursales Table/List -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">🏪 Lista de Sucursales por Performance</h3>
+                        <span id="sucursales-count" class="text-sm text-gray-500"></span>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sucursal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Áreas de Oportunidad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sucursales-table" class="bg-white divide-y divide-gray-200">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allSucursales = [];
+        let allIndicadores = [];
+        let map = null;
+        let markersLayer = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+
+        async function loadDashboardData() {
+            try {
+                // Load sucursales data
+                const sucursalesResponse = await fetch('/api/sucursales');
+                const sucursalesData = await sucursalesResponse.json();
+                
+                // Load indicators data
+                const indicadoresResponse = await fetch('/api/indicadores');
+                const indicadoresData = await indicadoresResponse.json();
+                
+                if (sucursalesData.status === 'success' && indicadoresData.status === 'success') {
+                    allSucursales = sucursalesData.data;
+                    allIndicadores = indicadoresData;
+                    
+                    // Hide loading, show content
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('content').classList.remove('hidden');
+                    
+                    // Initialize dashboard components
+                    initializeKPIs(sucursalesData.tiers);
+                    initializeFilters();
+                    initializeMap();
+                    populateIndicators();
+                    populateSucursalesTable();
+                    
+                } else {
+                    throw new Error('Error loading data from APIs');
+                }
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function initializeKPIs(tiers) {
+            const kpisContainer = document.getElementById('kpis-container');
+            
+            const kpis = [
+                { label: 'Tier 1 - Excelente', value: tiers.tier1, color: 'tier-1', icon: '🏆' },
+                { label: 'Tier 2 - Bueno', value: tiers.tier2, color: 'tier-2', icon: '⭐' },
+                { label: 'Tier 3 - Regular', value: tiers.tier3, color: 'tier-3', icon: '⚠️' },
+                { label: 'Tier 4 - Crítico', value: tiers.tier4, color: 'tier-4', icon: '🚨' }
+            ];
+            
+            kpisContainer.innerHTML = kpis.map(kpi => `
+                <div class="kpi-card rounded-lg shadow p-6 ${kpi.color}">
+                    <div class="flex items-center">
+                        <div class="text-3xl mr-3">${kpi.icon}</div>
+                        <div>
+                            <div class="text-2xl font-bold">${kpi.value}</div>
+                            <div class="text-sm opacity-90">${kpi.label}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initializeFilters() {
+            const estados = [...new Set(allSucursales.map(s => s.estado))].sort();
+            const grupos = [...new Set(allSucursales.map(s => s.grupo))].sort();
+            
+            // Populate estado filter
+            const estadoSelect = document.getElementById('filter-estado');
+            estados.forEach(estado => {
+                const option = document.createElement('option');
+                option.value = estado;
+                option.textContent = estado;
+                estadoSelect.appendChild(option);
+            });
+            
+            // Populate grupo filter
+            const grupoSelect = document.getElementById('filter-grupo');
+            grupos.forEach(grupo => {
+                const option = document.createElement('option');
+                option.value = grupo;
+                option.textContent = grupo;
+                grupoSelect.appendChild(option);
+            });
+        }
+
+        function initializeMap() {
+            // Initialize map
+            map = L.map('map').setView([25.6866, -100.3161], 6); // Center on Mexico
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Initialize marker cluster group
+            markersLayer = L.markerClusterGroup({
+                maxClusterRadius: 50,
+                spiderfyOnMaxZoom: false
+            });
+            
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            // Clear existing markers
+            if (markersLayer) {
+                markersLayer.clearLayers();
+            }
+            
+            // Add markers for each sucursal
+            allSucursales.forEach(sucursal => {
+                if (sucursal.lat && sucursal.lng) {
+                    // Determine marker color by tier
+                    let markerColor = '#dc2626'; // Default red
+                    if (sucursal.tier.includes('Tier 1')) markerColor = '#059669';
+                    else if (sucursal.tier.includes('Tier 2')) markerColor = '#10b981';
+                    else if (sucursal.tier.includes('Tier 3')) markerColor = '#f59e0b';
+                    
+                    const marker = L.circleMarker([sucursal.lat, sucursal.lng], {
+                        color: markerColor,
+                        fillColor: markerColor,
+                        fillOpacity: 0.7,
+                        radius: 8,
+                        weight: 2
+                    });
+                    
+                    marker.bindPopup(`
+                        <div class="p-2">
+                            <h4 class="font-bold">${sucursal.name}</h4>
+                            <p class="text-sm"><strong>Tier:</strong> ${sucursal.tier}</p>
+                            <p class="text-sm"><strong>Calificación:</strong> ${sucursal.calificacion}%</p>
+                            <p class="text-sm"><strong>Grupo:</strong> ${sucursal.grupo}</p>
+                            <p class="text-sm"><strong>Ubicación:</strong> ${sucursal.ciudad}, ${sucursal.estado}</p>
+                            <p class="text-sm"><strong>Áreas de Oportunidad:</strong></p>
+                            <ul class="text-xs mt-1">
+                                ${sucursal.areasOportunidad.map(area => `<li>• ${area}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `);
+                    
+                    markersLayer.addLayer(marker);
+                }
+            });
+            
+            map.addLayer(markersLayer);
+        }
+
+        function populateIndicators() {
+            if (allIndicadores.top5) {
+                const topContainer = document.getElementById('top-indicators');
+                topContainer.innerHTML = allIndicadores.top5.map((indicator, index) => `
+                    <div class="flex justify-between items-center p-2 bg-green-50 rounded">
+                        <span class="text-sm font-medium">${index + 1}. ${indicator.area_evaluacion}</span>
+                        <span class="text-sm font-bold text-green-700">${indicator.promedio.toFixed(1)}%</span>
+                    </div>
+                `).join('');
+            }
+            
+            if (allIndicadores.bottom5) {
+                const bottomContainer = document.getElementById('bottom-indicators');
+                bottomContainer.innerHTML = allIndicadores.bottom5.map((indicator, index) => `
+                    <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                        <span class="text-sm font-medium">${index + 1}. ${indicator.area_evaluacion}</span>
+                        <span class="text-sm font-bold text-red-700">${indicator.promedio.toFixed(1)}%</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function populateSucursalesTable() {
+            const tbody = document.getElementById('sucursales-table');
+            const countSpan = document.getElementById('sucursales-count');
+            
+            countSpan.textContent = `${allSucursales.length} sucursales`;
+            
+            tbody.innerHTML = allSucursales.map(sucursal => {
+                let tierClass = 'tier-4';
+                if (sucursal.tier.includes('Tier 1')) tierClass = 'tier-1';
+                else if (sucursal.tier.includes('Tier 2')) tierClass = 'tier-2';
+                else if (sucursal.tier.includes('Tier 3')) tierClass = 'tier-3';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-medium text-gray-900">${sucursal.name}</div>
+                            <div class="text-sm text-gray-500">${sucursal.trimestre}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="tier-badge ${tierClass}">${sucursal.tier}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-lg font-bold">${sucursal.calificacion}%</div>
+                            <div class="text-xs text-gray-500">${sucursal.areasEvaluadas} áreas</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${sucursal.grupo}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${sucursal.ciudad}, ${sucursal.estado}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            <div class="max-w-xs">
+                                ${sucursal.areasOportunidad.join(', ')}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function applyFilters() {
+            const tierFilter = document.getElementById('filter-tier').value;
+            const estadoFilter = document.getElementById('filter-estado').value;
+            const grupoFilter = document.getElementById('filter-grupo').value;
+            
+            // Filter sucursales
+            let filteredSucursales = allSucursales;
+            
+            if (tierFilter) {
+                filteredSucursales = filteredSucursales.filter(s => s.tier.includes(tierFilter));
+            }
+            
+            if (estadoFilter) {
+                filteredSucursales = filteredSucursales.filter(s => s.estado === estadoFilter);
+            }
+            
+            if (grupoFilter) {
+                filteredSucursales = filteredSucursales.filter(s => s.grupo === grupoFilter);
+            }
+            
+            // Update table with filtered data
+            allSucursales = filteredSucursales;
+            populateSucursalesTable();
+            updateMapMarkers();
+            
+            // Update KPIs for filtered data
+            const tiers = {
+                tier1: filteredSucursales.filter(s => s.tier.includes('Tier 1')).length,
+                tier2: filteredSucursales.filter(s => s.tier.includes('Tier 2')).length,
+                tier3: filteredSucursales.filter(s => s.tier.includes('Tier 3')).length,
+                tier4: filteredSucursales.filter(s => s.tier.includes('Tier 4')).length
+            };
+            
+            initializeKPIs(tiers);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('filter-tier').value = '';
+            document.getElementById('filter-estado').value = '';
+            document.getElementById('filter-grupo').value = '';
+            loadDashboardData(); // Reload original data
+        }
+    </script>
+</body>
+</html>
