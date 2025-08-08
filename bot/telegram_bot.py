@@ -32,11 +32,22 @@ Usa el botón *"📊 Abrir Dashboard Analytics"* en el menú inferior para acced
 • 29 indicadores por áreas
 • Datos reales de PostgreSQL
 
+💡 *Comandos disponibles:*
+• `/clean` - Eliminar botones del teclado
+
 ¡Listo para tu presentación! 🚀
     """
     
     await update.message.reply_text(
         welcome_message,
+        parse_mode='Markdown',
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+async def clean(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Eliminar completamente los botones del teclado."""
+    await update.message.reply_text(
+        "✅ *Botones del teclado eliminados*\n\nAhora solo tienes disponible el botón azul *'📊 Abrir Dashboard Analytics'* en el menú inferior.",
         parse_mode='Markdown',
         reply_markup=ReplyKeyboardRemove()
     )
@@ -74,6 +85,7 @@ def main() -> None:
 
     # Add only essential handlers
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("clean", clean))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     # Run the bot
