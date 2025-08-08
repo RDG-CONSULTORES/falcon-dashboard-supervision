@@ -359,16 +359,6 @@
                         <div class="kpi-label">Promedio General</div>
                         <div class="kpi-change" id="kpi-promedio-change">-</div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-value" id="kpi-cumplimiento">-</div>
-                        <div class="kpi-label">Cumplimiento ≥70%</div>
-                        <div class="kpi-change positive" id="kpi-cumplimiento-change">-</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-value" id="kpi-evaluaciones">-</div>
-                        <div class="kpi-label">Total Evaluaciones</div>
-                        <div class="kpi-change positive" id="kpi-evaluaciones-change">-</div>
-                    </div>
                 </div>
 
                 <!-- Charts Grid -->
@@ -507,8 +497,6 @@
                 
                 document.getElementById('kpi-sucursales').textContent = data.sucursales_evaluadas;
                 document.getElementById('kpi-promedio').textContent = data.promedio_general + '%';
-                document.getElementById('kpi-cumplimiento').textContent = data.cumplimiento + '%';
-                document.getElementById('kpi-evaluaciones').textContent = data.total_evaluaciones.toLocaleString();
                 
                 // Update change indicators
                 const change = data.variacion_trimestre || 0;
