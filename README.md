@@ -1,6 +1,8 @@
-# Falcon Miniapp Bot - Analytics de Supervisión Operativa
+# 🎯 Dashboard Supervisión Operativa
 
-Bot de Telegram con Mini Web App para visualización y análisis de datos de supervisión operativa. Conecta con la base de datos existente de `supervision_operativa_detalle` para mostrar gráficas interactivas y métricas en tiempo real.
+**Status**: ✅ **LISTO PARA PRESENTACIÓN 12:30 PM**
+
+Dashboard web completo con datos reales de PostgreSQL, mapas interactivos y sistema de 29 indicadores con límite crítico en 70%.
 
 ## 🚀 Características
 
