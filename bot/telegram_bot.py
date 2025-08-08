@@ -1,6 +1,6 @@
 import os
 import logging
-from telegram import Update, WebAppInfo, MenuButtonWebApp, ReplyKeyboardRemove
+from telegram import Update, WebAppInfo, MenuButtonWebApp, ReplyKeyboardRemove, BotCommand
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from dotenv import load_dotenv
 
@@ -41,15 +41,24 @@ Usa el botón *"📊 Abrir Dashboard Analytics"* en el menú inferior para acced
     await update.message.reply_text(
         welcome_message,
         parse_mode='Markdown',
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=ReplyKeyboardRemove(remove_keyboard=True)
     )
 
 async def clean(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Eliminar completamente los botones del teclado."""
+    # Force remove keyboard with remove_keyboard=True
     await update.message.reply_text(
-        "✅ *Botones del teclado eliminados*\n\nAhora solo tienes disponible el botón azul *'📊 Abrir Dashboard Analytics'* en el menú inferior.",
+        "🧹 *Eliminando botones del teclado...*",
         parse_mode='Markdown',
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=ReplyKeyboardRemove(remove_keyboard=True)
+    )
+    
+    # Send confirmation message
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="✅ *Botones eliminados completamente*\n\nSi aún ves botones abajo, cierra y vuelve a abrir el chat del bot.\n\nSolo disponible: botón azul *'📊 Abrir Dashboard Analytics'*",
+        parse_mode='Markdown',
+        reply_markup=ReplyKeyboardRemove(remove_keyboard=True)
     )
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -57,12 +66,24 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.message.reply_text(
         "📊 Usa el botón *'📊 Abrir Dashboard Analytics'* en el menú inferior para acceder al dashboard.",
         parse_mode='Markdown',
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=ReplyKeyboardRemove(remove_keyboard=True)
     )
 
 async def post_init(application: Application) -> None:
-    """Configure the Web App menu button after bot initialization."""
+    """Configure the Web App menu button and bot commands after bot initialization."""
     bot = application.bot
+    
+    # Configure bot commands list
+    commands = [
+        BotCommand("start", "Iniciar el bot y acceder al dashboard"),
+        BotCommand("clean", "Eliminar botones del teclado completamente")
+    ]
+    
+    try:
+        await bot.set_my_commands(commands)
+        logger.info("✅ Comandos del bot configurados")
+    except Exception as e:
+        logger.error(f"Error configurando comandos: {e}")
     
     # Configure the menu button to open the Web App
     from telegram import MenuButtonWebApp, WebAppInfo
