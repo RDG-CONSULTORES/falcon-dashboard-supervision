@@ -1,6 +1,6 @@
 import os
 import logging
-from telegram import Update, WebAppInfo, MenuButtonWebApp
+from telegram import Update, WebAppInfo, MenuButtonWebApp, ReplyKeyboardRemove
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from dotenv import load_dotenv
 
@@ -37,14 +37,16 @@ Usa el botón *"📊 Abrir Dashboard Analytics"* en el menú inferior para acced
     
     await update.message.reply_text(
         welcome_message,
-        parse_mode='Markdown'
+        parse_mode='Markdown',
+        reply_markup=ReplyKeyboardRemove()
     )
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle any text message - redirect to dashboard."""
     await update.message.reply_text(
         "📊 Usa el botón *'📊 Abrir Dashboard Analytics'* en el menú inferior para acceder al dashboard.",
-        parse_mode='Markdown'
+        parse_mode='Markdown',
+        reply_markup=ReplyKeyboardRemove()
     )
 
 async def post_init(application: Application) -> None:
