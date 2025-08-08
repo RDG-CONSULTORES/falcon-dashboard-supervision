@@ -7,8 +7,8 @@ import os
 import json
 from datetime import datetime
 from flask import Flask, render_template, jsonify, request
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,7 +21,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 def get_db_connection():
     """Establecer conexión a PostgreSQL"""
     try:
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = psycopg.connect(DATABASE_URL)
         return conn
     except Exception as e:
         print(f"Error conectando a la base de datos: {e}")
@@ -42,7 +42,7 @@ def get_kpis():
     if not conn:
         return jsonify({'error': 'Error de conexión'}), 500
     
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
     
     # Mapeo de trimestres
     quarter_map = {'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4}
@@ -111,7 +111,7 @@ def get_indicadores():
     if not conn:
         return jsonify({'error': 'Error de conexión'}), 500
     
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
     
     quarter_map = {'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4}
     quarter_num = quarter_map.get(trimestre, 3)
@@ -192,7 +192,7 @@ def get_sucursales():
     if not conn:
         return jsonify({'error': 'Error de conexión'}), 500
     
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
     
     quarter_map = {'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4}
     quarter_num = quarter_map.get(trimestre, 3)
@@ -283,7 +283,7 @@ def get_estados():
     if not conn:
         return jsonify({'error': 'Error de conexión'}), 500
     
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
     
     quarter_map = {'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4}
     quarter_num = quarter_map.get(trimestre, 3)
@@ -335,7 +335,7 @@ def get_grupos():
     if not conn:
         return jsonify({'error': 'Error de conexión'}), 500
     
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
     
     quarter_map = {'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4}
     quarter_num = quarter_map.get(trimestre, 3)
@@ -384,7 +384,7 @@ def get_filtros():
     if not conn:
         return jsonify({'error': 'Error de conexión'}), 500
     
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
     
     try:
         # Estados únicos
